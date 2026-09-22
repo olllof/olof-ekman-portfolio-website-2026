@@ -51,11 +51,11 @@ const imgUrl = (url, w) => url.split('?')[0] + `?auto=format,compress&w=${w}`
                 :style='{ aspectRatio: `${hero.dimensions.width} / ${hero.dimensions.height}`, maxHeight: "560px" }'
             )
 
-    .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
-        a.portrait-card.block.relative.overflow-hidden.mb-4(
+    .gallery.pb-8(class='columns-2 md_columns-3' style='column-gap: 2.5rem;')
+        a.portrait-card.block.relative.overflow-hidden(
             v-for='(img, i) in gallery' :key='i'
             href='#'
-            style='break-inside: avoid; background: #15171d;'
+            style='break-inside: avoid; background: #15171d; margin-bottom: 2.5rem;'
         )
             img.w-full.block(:src='imgUrl(img.url, 900)' :alt='img.alt || "Portrait"')
 
