@@ -1,0 +1,50 @@
+@font-face {
+    font-family: 'Kooltura';
+    src: url('KoolturaDEMO.woff2') format('woff2'),
+        url('KoolturaDEMO.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ABCMarfaMono-Light.otf */
+@font-face {
+    font-family: 'ABCMarfaMono';
+    src: url('ABCMarfaMono-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+/* Druk-Medium.otf & Druk-MediumItalic.otf */
+@font-face {
+    font-family: 'Drukk';
+    src: url('Druk-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Monument Extended';
+    src: url('MonumentExtended-Regular.woff2') format('woff2'),
+        url('MonumentExtended-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SG';
+    src: url('sporting_grotesque.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* @font-face {
+    font-family: 'M';
+    src: url('ABCMarfaMono-Light.otf') format('otf');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+} */

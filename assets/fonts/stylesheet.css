@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'Kooltura';
+    src: url('KoolturaDEMO.woff2') format('woff2'),
+        url('KoolturaDEMO.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}

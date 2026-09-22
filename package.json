@@ -1,0 +1,41 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@nuxtjs/device": "^3.1.1",
+    "@nuxtjs/google-fonts": "^3.1.3",
+    "@nuxtjs/prismic": "^3.1.0",
+    "@nuxtjs/tailwindcss": "^6.11.4",
+    "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
+    "dayjs-nuxt": "^2.1.9",
+    "nuxt": "^3.10.2",
+    "nuxt-icon": "^0.6.8",
+    "nuxt-simple-sitemap": "^3.4.1",
+    "sass": "^1.71.0",
+    "vite-plugin-pug": "^0.3.2",
+    "vue": "^3.4.19",
+    "vue-router": "^4.2.5"
+  },
+  "dependencies": {
+    "@hypernym/nuxt-anime": "^2.1.1",
+    "@nuxtjs/robots": "^3.0.0",
+    "@nuxtjs/seo": "^2.0.0-rc.9",
+    "@pinia/nuxt": "^0.5.1",
+    "animejs": "^3.2.2",
+    "baseline-browser-mapping": "^2.9.19",
+    "caniuse-lite": "^1.0.30001770",
+    "marked": "^12.0.0",
+    "nuxt-swiper": "^1.2.2",
+    "slugify": "^1.6.6",
+    "vue3-marquee": "^4.2.0"
+  }
+}
