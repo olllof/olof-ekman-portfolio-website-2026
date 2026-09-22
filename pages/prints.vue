@@ -62,29 +62,29 @@ const stopDemo = (i) => {
                 span.menu-color From €{{ hero.price }}
 
     .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
-        a.print-card.block.relative.overflow-hidden.mb-4(
+        a.print-card.block.mb-6(
             v-for='(item, i) in prints' :key='i'
             href='#'
             :class='{ "cursor-pointer": item.demo }'
             @mouseenter='startDemo(i, item)'
             @mouseleave='stopDemo(i)'
             @click.prevent='playingIndex === i ? stopDemo(i) : startDemo(i, item)'
-            style='break-inside: avoid; background: #15171d;'
+            style='break-inside: avoid;'
         )
-            img.w-full.block(:src='imgUrl(item.image, 900)' :alt='`Print, ${item.location} ${item.year}`' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
-            video.absolute.inset-0.w-full.h-full(
-                v-if='item.demo'
-                :data-print-video='i'
-                :src='item.demo'
-                muted loop playsinline preload='metadata'
-                :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
-            )
-            span.play-hint.mono.uppercase(v-if='item.demo' class='text-[0.6rem]') Hover to preview
-            .cap.absolute.left-0.right-0.bottom-0.flex.justify-between.items-end.px-3.py-2
-                div
-                    .text-sm(style='font-weight:600;') {{ item.location }}, {{ item.year }}
-                    .mono.opacity-60(class='text-[0.62rem]') Edition of 30
+            .thumb.relative.overflow-hidden(style='background: #15171d;')
+                img.w-full.block(:src='imgUrl(item.image, 900)' :alt='`Print, ${item.location} ${item.year}`' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
+                video.absolute.inset-0.w-full.h-full(
+                    v-if='item.demo'
+                    :data-print-video='i'
+                    :src='item.demo'
+                    muted loop playsinline preload='metadata'
+                    :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
+                )
+                span.play-hint.mono.uppercase(v-if='item.demo' class='text-[0.6rem]') Hover to preview
+            .cap.pt-2
+                .text-sm {{ item.location }}, {{ item.year }}
                 .mono.menu-color(class='text-xs') From €{{ item.price }}
+                .cap-line
 
     nuxt-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(to='/prints' class='text-xs border border-white/15 px-4 py-3') View all prints →
 
@@ -115,12 +115,9 @@ const stopDemo = (i) => {
         pointer-events: none
     .print-card:hover .play-hint
         opacity: 1
-    .cap
-        background: linear-gradient(180deg, transparent, rgba(12,14,18,0.88) 78%)
-        opacity: 0
-        transform: translateY(6px)
-        transition: opacity 0.25s ease, transform 0.25s ease
-    .print-card:hover .cap
-        opacity: 1
-        transform: translateY(0)
+    .cap-line
+        width: 2rem
+        height: 1px
+        background: rgba(255,255,255,0.3)
+        margin-top: 0.5rem
 </style>
