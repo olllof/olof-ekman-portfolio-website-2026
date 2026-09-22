@@ -27,7 +27,8 @@ const prints = [
 
 const imgUrl = (url, w) => url.split('?')[0] + `?auto=format,compress&w=${w}`
 
-// Which print (by index) currently has its demo clip playing.
+// Which print (by index) currently has its demo clip playing (hover preview
+// on desktop only — tapping a print opens the full-size lightbox instead).
 const playingIndex = ref(null)
 
 const startDemo = (i, item) => {
@@ -44,6 +45,19 @@ const stopDemo = (i) => {
     const el = document.querySelector(`[data-print-video="${i}"]`)
     if (el) el.pause()
 }
+
+// Click any print (including the hero) to see it full-size in the same
+// zoom/pan lightbox used on the Portraits/Weddings/etc. pages.
+const allImages = computed(() => [
+    { url: hero.image, alt: `${hero.location}, ${hero.year}` },
+    ...prints.map(p => ({ url: p.image, alt: `Print, ${p.location} ${p.year}` })),
+])
+const galleryOpen = ref(false)
+const galleryIndex = ref(0)
+const openLightbox = (i) => {
+    galleryIndex.value = i
+    galleryOpen.value = true
+}
 </script>
 
 <template lang="pug">
@@ -55,20 +69,19 @@ const stopDemo = (i) => {
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') Photographs to live with.
             p.mb-6(class='max-w-[34ch] opacity-70 text-sm') A selection of photographs available as fine art prints. Printed in Berlin, signed and carefully packed.
             nuxt-link.underline-hover.mono.uppercase(to='/prints#about' class='text-xs') About prints →
-        .hero-media.relative
+        .hero-media.relative.cursor-pointer(@click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='`${hero.location}, ${hero.year}`' class='h-[260px] md_h-[420px]')
             .flex.justify-between.mt-2.mono.opacity-70(class='text-xs')
                 span {{ hero.location }}, {{ hero.year }}
                 span.menu-color From €{{ hero.price }}
 
     .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
-        a.print-card.block.mb-6(
+        a.print-card.block.mb-6.cursor-pointer(
             v-for='(item, i) in prints' :key='i'
             href='#'
-            :class='{ "cursor-pointer": item.demo }'
             @mouseenter='startDemo(i, item)'
             @mouseleave='stopDemo(i)'
-            @click.prevent='playingIndex === i ? stopDemo(i) : startDemo(i, item)'
+            @click.prevent='openLightbox(i + 1)'
             style='break-inside: avoid;'
         )
             .thumb.relative.overflow-hidden(style='background: #15171d;')
@@ -96,6 +109,12 @@ const stopDemo = (i) => {
             div(class='pl-3 border-l border-white/15') Archival pigment inks
             div(class='pl-3 border-l border-white/15') Printed in Berlin
             div(class='pl-3 border-l border-white/15') Signed by Olof
+
+    PostGallery(
+        v-model='galleryOpen'
+        :images='allImages'
+        :initial-slide='galleryIndex'
+    )
 
 </template>
 
