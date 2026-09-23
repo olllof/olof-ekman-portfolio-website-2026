@@ -91,6 +91,12 @@ const openLightbox = (i) => {
     .gallery-card
         margin-bottom: 2.5rem
 
+        .thumb img
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)
+
+        &:hover .thumb img
+            transform: scale(1.3)
+
     .cap-line
         width: 2rem
         height: 1px
