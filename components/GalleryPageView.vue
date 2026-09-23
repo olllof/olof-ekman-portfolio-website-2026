@@ -48,6 +48,41 @@ const openLightbox = (i) => {
     galleryIndex.value = i
     galleryOpen.value = true
 }
+
+// Grid-based masonry: lays cards out left-to-right, top-to-bottom in the
+// exact order they're arranged in the Prismic `gallery` group, so the
+// order in Prismic maps directly to the order on the page. Each card's
+// row-span is computed from its real image aspect ratio (Prismic gives us
+// `dimensions` for free) so rows still pack tightly without gaps.
+const ROW_H = 8
+const GAP = 28
+const cardRefs = ref([])
+const setCardRef = (el, i) => { if (el) cardRefs.value[i] = el }
+
+const layoutGrid = () => {
+    cardRefs.value.forEach((el, i) => {
+        if (!el) return
+        const item = items.value[i]
+        const dims = item?.image?.dimensions
+        const ar = dims?.width && dims?.height ? dims.width / dims.height : 1
+        const width = el.offsetWidth
+        const imgHeight = width / ar
+        const capEl = el.querySelector('.cap')
+        const capHeight = capEl ? capEl.offsetHeight : 0
+        const span = Math.ceil((imgHeight + capHeight + GAP) / (ROW_H + GAP))
+        el.style.gridRowEnd = `span ${span}`
+    })
+}
+
+let resizeObserver
+onMounted(() => {
+    nextTick(layoutGrid)
+    resizeObserver = new ResizeObserver(() => layoutGrid())
+    const grid = document.querySelector('#gallery-page-view .gallery')
+    if (grid) resizeObserver.observe(grid)
+})
+onBeforeUnmount(() => resizeObserver?.disconnect())
+watch(items, () => nextTick(layoutGrid))
 </script>
 
 <template lang="pug">
@@ -62,15 +97,15 @@ const openLightbox = (i) => {
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption || title' class='h-[260px] md_h-[420px]')
             .mt-2.mono.opacity-70(v-if='hero.caption' class='text-xs') {{ hero.caption }}
 
-    .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
-        a.gallery-card.block.mb-6.cursor-pointer(
+    .gallery.pb-8
+        a.gallery-card.cursor-pointer(
             v-for='(item, i) in items' :key='i'
+            :ref='el => setCardRef(el, i)'
             href='#'
             @click.prevent='openLightbox(i + 1)'
-            style='break-inside: avoid;'
         )
-            .thumb.relative.overflow-hidden(style='background: #15171d;')
-                img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption || item.image.alt')
+            .thumb.relative.overflow-hidden(style='background: #15171d; flex: 1;')
+                img.w-full.h-full.block(style='object-fit: cover;' :src='imgUrl(item.image.url, 900)' :alt='item.caption || item.image.alt')
             .cap.pt-2(v-if='item.caption')
                 .text-sm {{ item.caption }}
                 .cap-line
@@ -85,6 +120,20 @@ const openLightbox = (i) => {
 
 <style lang="sass">
 #gallery-page-view
+    .gallery
+        display: grid
+        grid-template-columns: repeat(2, 1fr)
+        grid-auto-rows: 8px
+        grid-auto-flow: row
+        gap: 1.75rem
+        @media (min-width: 768px)
+            grid-template-columns: repeat(3, 1fr)
+            gap: 2.25rem
+
+    .gallery-card
+        display: flex
+        flex-direction: column
+
     .cap-line
         width: 2rem
         height: 1px
