@@ -95,7 +95,7 @@ const openLightbox = (i) => {
             transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)
 
         &:hover .thumb img
-            transform: scale(1.3)
+            transform: scale(1.05)
 
     .cap-line
         width: 2rem
