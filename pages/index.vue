@@ -25,8 +25,8 @@ const menu = computed(() => {
 
 const hoverN = ref(null)
 
-// Shown on the right when nothing is hovered: the Homepage "Default image"
-// field, falling back to the first menu item's image if none is set.
+// Shown when nothing is hovered: the Homepage "Default image" field,
+// falling back to the first menu item's image if none is set.
 const defaultImageUrl = computed(() =>
     homepage.value?.data?.image?.url || menu.value[0]?.image?.url || ''
 )
@@ -34,13 +34,12 @@ const defaultImageUrl = computed(() =>
 // Style for each menu item's hover image. Only the hovered item is visible.
 const itemImageStyle = (item, i) => ({
     backgroundImage: item.image?.url ? `url(${item.image.url})` : 'none',
-    width: 'calc(50vw - 2rem)',
     opacity: hoverN.value === i ? 1 : 0,
 })
 
 // Pull a dominant colour from each menu image (via the imgix palette API) so a
-// menu item's hover colour matches the picture shown on the right. Falls back
-// to the brand red if there's no image or the request fails.
+// menu item's hover colour matches the picture shown. Falls back to the
+// brand red if there's no image or the request fails.
 const RED = '#e0392b'
 const { data: menuColors } = await useAsyncData('menuColors', () =>
     Promise.all(menu.value.map(async (item) => {
@@ -70,56 +69,65 @@ const hoverTitleStyle = (item, i) => {
 
 <template lang="pug">
 #page.index.flex
-    .w-full.md_w-1x2
+    .w-full.md_w-1x2.flex.flex-col(class='md_justify-center md_min-h-[92vh]')
         .py-4.px-4
-            .info(v-if='homepage?.data?.body')
+            .menu.mb-6
+                .menu-item(
+                    v-for='(item, i) in menu' :key='i'
+                    @mouseenter='hoverN = i'
+                    @mouseleave='hoverN = null'
+                )
+                    nuxt-link(v-if='item.link?.uid' :to='`/posts/${item.link.uid}`')
+                        .pb-1.hover-title.font-b.uppercase.menu-title(:style='hoverTitleStyle(item, i)')
+                            | {{ item.title }}
+                    .pb-1.hover-title.font-b.uppercase.menu-title(v-else :style='hoverTitleStyle(item, i)')
+                        | {{ item.title }}
+
+            .info.description(v-if='homepage?.data?.body')
                 prismic-rich-text(:field='homepage?.data?.body')
 
-        .menu.ml-4.mr-8.py-2
-            .menu-item(
-                v-for='(item, i) in menu' :key='i'
-                @mouseenter='hoverN = i'
-                @mouseleave='hoverN = null'
-            )
-                nuxt-link(v-if='item.link?.uid' :to='`/posts/${item.link.uid}`')
-                    .pb-6.md_pb-5.hover-title(:style='hoverTitleStyle(item, i)')
-                        h4.uppercase.flex(class='text-[2rem] md_text-[5vw]')
-                            div {{ item.title }}
-                .pb-6.md_pb-5.hover-title(v-else :style='hoverTitleStyle(item, i)')
-                    h4.uppercase.flex(class='text-[2rem] md_text-[5vw]')
-                        div {{ item.title }}
-    .w-1x2.hidden.md_block
-        .images
-            .image(
-                v-if='defaultImageUrl'
-                :style='{ backgroundImage: `url(${defaultImageUrl})`, width: "calc(50vw - 2rem)", opacity: hoverN === null ? 1 : 0 }'
-                class='h-[100vh] right-[3.5rem]'
-                data-n='default'
-            ).fixed.top-0.bg-cover.bg-no-repeat.bg-center.bg-gray-100.index-image-hover-wrapper.z-40
-            .image(
-                v-for='(item, i) in menu' :key='i'
-                :style='itemImageStyle(item, i)'
-                class='h-[100vh] right-[3.5rem]'
-                :data-n='i'
-            ).fixed.top-0.bg-cover.bg-no-repeat.bg-center.bg-gray-100.index-image-hover-wrapper.z-40
+            .images.mt-4(v-if='defaultImageUrl || menu.length')
+                .image(
+                    v-if='defaultImageUrl'
+                    :style='{ backgroundImage: `url(${defaultImageUrl})`, opacity: hoverN === null ? 1 : 0 }'
+                    data-n='default'
+                ).absolute.inset-0.bg-cover.bg-no-repeat.bg-center.bg-gray-100.index-image-hover-wrapper.z-40
+                .image(
+                    v-for='(item, i) in menu' :key='i'
+                    :style='itemImageStyle(item, i)'
+                    :data-n='i'
+                ).absolute.inset-0.bg-cover.bg-no-repeat.bg-center.bg-gray-100.index-image-hover-wrapper.z-40
 </template>
 
 <style lang="sass">
-.info
-    font-family: 'Carlito', sans-serif
-    font-weight: 600
-
-    font-size: 30px
-    @media (min-width: 768px)
-        font-size: 2vw
-    line-height: 1.1
-    text-shadow: 0 0 10px #9995A4
-.menu-item h4
-    font-family: 'Monument Extended', sans-serif
-    line-height: 1
-.hover-title
-    transition: all 0.1s ease
-    text-shadow: 0 0 1rem transparent
-.index-image-hover-wrapper
-    transition: opacity 0.3s ease
+#page.index
+    .menu-title
+        display: block
+        font-size: clamp(1.6rem, 8.5vw, 3rem)
+        line-height: 0.86
+        @media (min-width: 768px)
+            font-size: 5vw
+    .description
+        font-family: 'Inter', Arial, Helvetica, sans-serif
+        font-weight: 400
+        font-size: 0.95rem
+        opacity: 0.7
+        max-width: 34ch
+        line-height: 1.4
+        text-shadow: none
+    .hover-title
+        transition: all 0.1s ease
+    .images
+        position: relative
+        width: 100%
+        height: 60vh
+        @media (min-width: 768px)
+            position: fixed
+            top: 0
+            right: 3.5rem
+            width: calc(50vw - 2rem)
+            height: 100vh
+            margin-top: 0
+    .index-image-hover-wrapper
+        transition: opacity 0.3s ease
 </style>
