@@ -2,20 +2,32 @@
 const { client } = usePrismic()
 const { data: page } = await useAsyncData('prints-page', () => client.getSingle('prints_page'))
 
+const d = computed(() => page.value?.data || {})
+
+const title = computed(() => d.value.title || 'Prints')
+const tagline = computed(() => d.value.tagline || 'Photographs to live with.')
+const description = computed(() => d.value.description || 'A selection of photographs available as fine art prints. Printed in Berlin, signed and carefully packed.')
+const bandHeading = computed(() => d.value.band_heading || 'Made to be lived with.')
+const bandDescription = computed(() => d.value.band_description || 'My prints are produced to order in Berlin using archival pigment inks on fine art paper. Each print is carefully checked, signed by me, and packed with care.')
+const specs = computed(() => {
+    const list = (d.value.specs || []).map(s => s.label).filter(Boolean)
+    return list.length ? list : ['Fine art paper', 'Archival pigment inks', 'Printed in Berlin', 'Signed by Olof']
+})
+
 const hero = computed(() => ({
-    image: page.value?.data?.hero_image?.url || '',
-    caption: page.value?.data?.hero_caption || '',
-    price: page.value?.data?.hero_price,
+    image: d.value.hero_image?.url || '',
+    caption: d.value.hero_caption || '',
+    price: d.value.hero_price,
 }))
 // Skip any print entry that's mid-edit in Prismic (image not set yet) so an
 // in-progress edit never breaks the live page — it just doesn't show until
 // the image is added.
-const prints = computed(() => (page.value?.data?.prints || []).filter(p => p.image?.url))
+const prints = computed(() => (d.value.prints || []).filter(p => p.image?.url))
 
 useSeoMeta({
-    title: 'Prints',
-    ogTitle: 'Prints — Olof Ekman',
-    description: 'Fine art photography prints by Olof Ekman. Printed in Berlin, signed and carefully packed.',
+    title: () => title.value,
+    ogTitle: () => `${title.value} — Olof Ekman`,
+    description: () => description.value,
     ogImage: () => hero.value.image,
 })
 
@@ -59,9 +71,9 @@ const openLightbox = (i) => {
 
     .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
         div
-            h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') Prints
-            p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') Photographs to live with.
-            p.mb-6(class='max-w-[34ch] opacity-70 text-sm') A selection of photographs available as fine art prints. Printed in Berlin, signed and carefully packed.
+            h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') {{ title }}
+            p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
+            p.mb-6(class='max-w-[34ch] opacity-70 text-sm') {{ description }}
             nuxt-link.underline-hover.mono.uppercase(to='/prints#about' class='text-xs') About prints →
         .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]')
@@ -96,13 +108,10 @@ const openLightbox = (i) => {
     nuxt-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(to='/prints' class='text-xs border border-white/15 px-4 py-3') View all prints →
 
     .band.grid.gap-8.pt-8(class='md_grid-cols-3 border-t border-white/10')
-        h2.uppercase.font-b(class='text-[2.2rem] md_text-[2.8rem] leading-[0.92]') Made to be lived with.
-        p.opacity-70(class='text-sm max-w-[38ch] self-center') My prints are produced to order in Berlin using archival pigment inks on fine art paper. Each print is carefully checked, signed by me, and packed with care.
+        h2.uppercase.font-b(class='text-[2.2rem] md_text-[2.8rem] leading-[0.92]') {{ bandHeading }}
+        p.opacity-70(class='text-sm max-w-[38ch] self-center') {{ bandDescription }}
         .specs.flex.flex-col.gap-2.justify-center.mono.uppercase(class='text-xs opacity-70')
-            div(class='pl-3 border-l border-white/15') Fine art paper
-            div(class='pl-3 border-l border-white/15') Archival pigment inks
-            div(class='pl-3 border-l border-white/15') Printed in Berlin
-            div(class='pl-3 border-l border-white/15') Signed by Olof
+            div(v-for='(spec, i) in specs' :key='i' class='pl-3 border-l border-white/15') {{ spec }}
 
     PostGallery(
         v-model='galleryOpen'
