@@ -7,7 +7,10 @@ const hero = computed(() => ({
     caption: page.value?.data?.hero_caption || '',
     price: page.value?.data?.hero_price,
 }))
-const prints = computed(() => page.value?.data?.prints || [])
+// Skip any print entry that's mid-edit in Prismic (image not set yet) so an
+// in-progress edit never breaks the live page — it just doesn't show until
+// the image is added.
+const prints = computed(() => (page.value?.data?.prints || []).filter(p => p.image?.url))
 
 useSeoMeta({
     title: 'Prints',
