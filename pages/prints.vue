@@ -1,29 +1,20 @@
 <script setup>
+const { client } = usePrismic()
+const { data: page } = await useAsyncData('prints-page', () => client.getSingle('prints_page'))
+
+const hero = computed(() => ({
+    image: page.value?.data?.hero_image?.url || '',
+    caption: page.value?.data?.hero_caption || '',
+    price: page.value?.data?.hero_price,
+}))
+const prints = computed(() => page.value?.data?.prints || [])
+
 useSeoMeta({
     title: 'Prints',
     ogTitle: 'Prints — Olof Ekman',
     description: 'Fine art photography prints by Olof Ekman. Printed in Berlin, signed and carefully packed.',
+    ogImage: () => hero.value.image,
 })
-
-// TEMP placeholder selection — swap these for the real print picks, prices
-// and editions whenever those are decided. `demo` is an optional short
-// muted clip (public/prints/*.mp4) that plays on hover/tap over the image.
-const hero = {
-    image: 'https://images.prismic.io/olof-ekman/9EsWqC8BodSI1clB_OlofEkman_Concert_Scion%26Tikiman17.jpg',
-    location: 'Sweden', year: 2024, price: 95,
-}
-
-const prints = [
-    { image: 'https://images.prismic.io/olof-ekman/lnzrKpcpwWaxH6UC_Max.jpg', location: 'Berlin', year: 2024, price: 85, demo: '/prints/grid1-demo.mp4' },
-    { image: 'https://images.prismic.io/olof-ekman/GvYco6kEGHVwhk1q_DSCF0177.jpg', location: 'Berlin', year: 2024, price: 75 },
-    { image: 'https://images.prismic.io/olof-ekman/6P0K856AtNO4ep3S_R1-02106-0019.jpg', location: 'Berlin', year: 2023, price: 75 },
-    { image: 'https://images.prismic.io/olof-ekman/563m0RugDrme2_Ep_Anja%26KiretWedding_%F0%9F%93%B8Olof_Ekman_Edited1st_Selection24.jpg', location: 'Berlin', year: 2024, price: 95 },
-    { image: 'https://images.prismic.io/olof-ekman/U1aUkMSeo8rzqMgF_IMG_4700.jpg', location: 'Berlin', year: 2023, price: 75 },
-    { image: 'https://images.prismic.io/olof-ekman/Jpejfy7w3vhyaphb_R1-05113-0006.jpg', location: 'Berlin', year: 2024, price: 85 },
-    { image: 'https://images.prismic.io/olof-ekman/220bLJ-zHpWuOhZX_Anja%26KiretWedding_%F0%9F%93%B8Olof_Ekman_Edited1st_Selection10.jpg', location: 'Berlin', year: 2024, price: 95 },
-    { image: 'https://images.prismic.io/olof-ekman/5h7YqaepGY2HuTIy_DSCF0609.jpg', location: 'Berlin', year: 2025, price: 75 },
-    { image: 'https://images.prismic.io/olof-ekman/7WripKUMmiO_6IBT_Anja%26KiretWedding_%F0%9F%93%B8Olof_Ekman_Edited2nd_Selection22.jpg', location: 'Berlin', year: 2024, price: 85 },
-]
 
 const imgUrl = (url, w) => url.split('?')[0] + `?auto=format,compress&w=${w}`
 
@@ -32,7 +23,7 @@ const imgUrl = (url, w) => url.split('?')[0] + `?auto=format,compress&w=${w}`
 const playingIndex = ref(null)
 
 const startDemo = (i, item) => {
-    if (!item.demo) return
+    if (!item.demo_video?.url) return
     playingIndex.value = i
     nextTick(() => {
         const el = document.querySelector(`[data-print-video="${i}"]`)
@@ -49,8 +40,8 @@ const stopDemo = (i) => {
 // Click any print (including the hero) to see it full-size in the same
 // zoom/pan lightbox used on the Portraits/Weddings/etc. pages.
 const allImages = computed(() => [
-    { url: hero.image, alt: `${hero.location}, ${hero.year}` },
-    ...prints.map(p => ({ url: p.image, alt: `Print, ${p.location} ${p.year}` })),
+    { url: hero.value.image, alt: hero.value.caption },
+    ...prints.value.map(p => ({ url: p.image?.url, alt: p.caption || p.image?.alt })),
 ])
 const galleryOpen = ref(false)
 const galleryIndex = ref(0)
@@ -69,10 +60,10 @@ const openLightbox = (i) => {
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') Photographs to live with.
             p.mb-6(class='max-w-[34ch] opacity-70 text-sm') A selection of photographs available as fine art prints. Printed in Berlin, signed and carefully packed.
             nuxt-link.underline-hover.mono.uppercase(to='/prints#about' class='text-xs') About prints →
-        .hero-media.relative.cursor-pointer(@click='openLightbox(0)')
-            img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='`${hero.location}, ${hero.year}`' class='h-[260px] md_h-[420px]')
+        .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
+            img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]')
             .flex.justify-between.mt-2.mono.opacity-70(class='text-xs')
-                span {{ hero.location }}, {{ hero.year }}
+                span {{ hero.caption }}
                 span.menu-color From €{{ hero.price }}
 
     .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
@@ -85,17 +76,17 @@ const openLightbox = (i) => {
             style='break-inside: avoid;'
         )
             .thumb.relative.overflow-hidden(style='background: #15171d;')
-                img.w-full.block(:src='imgUrl(item.image, 900)' :alt='`Print, ${item.location} ${item.year}`' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
+                img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
                 video.absolute.inset-0.w-full.h-full(
-                    v-if='item.demo'
+                    v-if='item.demo_video?.url'
                     :data-print-video='i'
-                    :src='item.demo'
+                    :src='item.demo_video.url'
                     muted loop playsinline preload='metadata'
                     :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
                 )
-                span.play-hint.mono.uppercase(v-if='item.demo' class='text-[0.6rem]') Hover to preview
+                span.play-hint.mono.uppercase(v-if='item.demo_video?.url' class='text-[0.6rem]') Hover to preview
             .cap.pt-2
-                .text-sm {{ item.location }}, {{ item.year }}
+                .text-sm {{ item.caption }}
                 .mono.menu-color(class='text-xs') From €{{ item.price }}
                 .cap-line
 
