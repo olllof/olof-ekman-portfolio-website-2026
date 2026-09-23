@@ -30,7 +30,11 @@ export default defineNuxtConfig({
     
     prismic: {
         endpoint: 'olof-ekman',
-        toolbar: false
+        // Required for Prismic's "Preview" button (in the document editor)
+        // to work — it loads Prismic's small toolbar script that manages
+        // the preview session.
+        toolbar: true,
+        linkResolver: './prismic/linkResolver.js',
     },
     
     anime: {
