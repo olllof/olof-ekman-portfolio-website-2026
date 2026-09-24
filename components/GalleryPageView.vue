@@ -87,7 +87,7 @@ const desktopColumns = computed(() => distributeColumns(3))
 <template lang="pug">
 #gallery-page-view.mx-4.py-4.md_mx-6.md_py-6.xl_mx-8.xl_py-8(class='min-h-[92vh]')
 
-    nav.category-nav.flex.flex-wrap.justify-center.gap-x-6.gap-y-2.mb-6
+    nav.category-nav.mb-6
         nuxt-link.underline-hover(
             v-for='item in categoryNav' :key='item.uid'
             :to='`/posts/${item.uid}`'
@@ -142,11 +142,20 @@ const desktopColumns = computed(() => distributeColumns(3))
 <style lang="sass">
 #gallery-page-view
     .category-nav
-        font-size: 0.8rem
+        display: flex
+        flex-wrap: nowrap
+        justify-content: center
+        gap: clamp(0.5rem, 3vw, 1.5rem)
         letter-spacing: 0.03em
+        -webkit-text-size-adjust: 100%
+        text-size-adjust: 100%
+        overflow-x: auto
+        padding-bottom: 2px
         a
+            flex: none
             text-transform: uppercase
             font-weight: 500
+            font-size: clamp(0.45rem, calc((100vw - 4.5rem) / 30), 0.8rem)
 
     .page-title
         display: block
