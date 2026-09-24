@@ -69,7 +69,7 @@ const submit = async () => {
             button.underline-hover.mono.uppercase(type='submit' :disabled='status === "sending"' class='text-sm')
                 | {{ status === 'sending' ? 'Sending…' : 'Send message' }} →
 
-            p.mt-4.text-sm(v-if='status === "sent"' style='color: #7CD68A;') Thanks — your message is on its way.
+            p.mt-4.text-sm.menu-color(v-if='status === "sent"') Thanks — your message is on its way.
             p.mt-4.text-sm(v-if='status === "error"' style='color: #e0392b;') {{ errorMessage }}
 
         .divider.mb-8
