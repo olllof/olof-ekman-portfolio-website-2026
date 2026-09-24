@@ -77,7 +77,7 @@ const hoverTitleStyle = (item, i) => {
                     @mouseenter='hoverN = i'
                     @mouseleave='hoverN = null'
                 )
-                    prismic-link(v-if='item.link?.uid || item.link?.url' :field='item.link')
+                    prismic-link(v-if='item.link?.link_type && item.link.link_type !== "Any"' :field='item.link')
                         .pb-1.hover-title.font-b.uppercase.menu-title(:style='hoverTitleStyle(item, i)')
                             | {{ item.title }}
                     .pb-1.hover-title.font-b.uppercase.menu-title(v-else :style='hoverTitleStyle(item, i)')
