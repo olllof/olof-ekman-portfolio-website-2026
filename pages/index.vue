@@ -86,6 +86,8 @@ const hoverTitleStyle = (item, i) => {
             .info.description(v-if='homepage?.data?.body')
                 prismic-rich-text(:field='homepage?.data?.body')
 
+            nuxt-link.underline-hover.mono.uppercase.mt-4.inline-block(to='/contact' class='text-xs') Book me →
+
             .images.mt-4(v-if='defaultImageUrl || menu.length')
                 .image(
                     v-if='defaultImageUrl'
