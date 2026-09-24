@@ -22,7 +22,10 @@ useSeoMeta({
     ogImage: () => heroImage.value,
 })
 
-const form = reactive({ name: '', email: '', subject: '', message: '' })
+// Pre-fills from ?subject=... (e.g. a print's "Order" link) so a visitor
+// doesn't have to type it themselves.
+const route = useRoute()
+const form = reactive({ name: '', email: '', subject: route.query.subject || '', message: '' })
 const status = ref('idle') // idle | sending | sent | error
 const errorMessage = ref('')
 

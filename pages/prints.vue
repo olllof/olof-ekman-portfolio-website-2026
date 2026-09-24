@@ -47,6 +47,13 @@ const formatPrice = (price) => {
     return str.includes('-') ? `${str}€` : `From €${str}`
 }
 
+// Sends the visitor to the contact form with the print's name already in
+// the subject line, so they don't have to type it themselves.
+const orderLink = (item) => ({
+    path: '/contact',
+    query: { subject: item.caption ? `Order: ${item.caption}` : 'Print order' },
+})
+
 // Which print (by index) currently has its demo clip playing (hover preview
 // on desktop only — tapping a print opens the full-size lightbox instead).
 const playingIndex = ref(null)
@@ -89,22 +96,24 @@ const openLightbox = (i) => {
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
             p.mb-6(class='max-w-[34ch] text-sm') {{ description }}
             prismic-link.underline-hover.mono.uppercase(v-if='aboutCtaLabel' :field='aboutCtaLink' class='text-xs') {{ aboutCtaLabel }} →
-        .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
-            img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]')
-            .flex.justify-between.mt-2.mono.opacity-70(class='text-xs')
+        .hero-media(v-if='hero.image')
+            img.w-full.object-cover.cursor-pointer(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]' @click='openLightbox(0)')
+            .flex.justify-between.items-center.mt-2.mono.opacity-70(class='text-xs')
                 span {{ hero.caption }}
                 span.menu-color {{ formatPrice(hero.price) }}
+            nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(hero)' class='text-xs') Order →
 
     .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
-        a.print-card.block.mb-6.cursor-pointer(
+        .print-card.block.mb-6(
             v-for='(item, i) in prints' :key='i'
-            href='#'
-            @mouseenter='startDemo(i, item)'
-            @mouseleave='stopDemo(i)'
-            @click.prevent='openLightbox(i + 1)'
             style='break-inside: avoid;'
         )
-            .thumb.relative.overflow-hidden(style='background: #15171d;')
+            .thumb.relative.overflow-hidden.cursor-pointer(
+                style='background: #15171d;'
+                @mouseenter='startDemo(i, item)'
+                @mouseleave='stopDemo(i)'
+                @click='openLightbox(i + 1)'
+            )
                 img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
                 video.absolute.inset-0.w-full.h-full(
                     v-if='item.demo_video?.url'
@@ -118,6 +127,7 @@ const openLightbox = (i) => {
                 .text-sm {{ item.caption }}
                 .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
                 .cap-line
+                nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(item)' class='text-xs') Order →
 
     prismic-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(v-if='viewAllCtaLabel' :field='viewAllCtaLink' class='text-xs border border-white/15 px-4 py-3') {{ viewAllCtaLabel }} →
 
