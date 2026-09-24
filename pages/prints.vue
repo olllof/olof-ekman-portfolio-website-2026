@@ -33,6 +33,14 @@ useSeoMeta({
 
 const imgUrl = (url, w) => url.split('?')[0] + `?auto=format,compress&w=${w}`
 
+// A single number ("95") reads as "From €95"; a range ("75-95") reads as
+// "75-95€" instead, since "From" doesn't make sense for a range.
+const formatPrice = (price) => {
+    if (!price && price !== 0) return ''
+    const str = String(price).trim()
+    return str.includes('-') ? `${str}€` : `From €${str}`
+}
+
 // Which print (by index) currently has its demo clip playing (hover preview
 // on desktop only — tapping a print opens the full-size lightbox instead).
 const playingIndex = ref(null)
@@ -79,7 +87,7 @@ const openLightbox = (i) => {
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]')
             .flex.justify-between.mt-2.mono.opacity-70(class='text-xs')
                 span {{ hero.caption }}
-                span.menu-color From €{{ hero.price }}
+                span.menu-color {{ formatPrice(hero.price) }}
 
     .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
         a.print-card.block.mb-6.cursor-pointer(
@@ -102,7 +110,7 @@ const openLightbox = (i) => {
                 span.play-hint.mono.uppercase(v-if='item.demo_video?.url' class='text-[0.6rem]') Hover to preview
             .cap.pt-2
                 .text-sm {{ item.caption }}
-                .mono.menu-color(class='text-xs') From €{{ item.price }}
+                .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
                 .cap-line
 
     nuxt-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(to='/prints' class='text-xs border border-white/15 px-4 py-3') View all prints →
