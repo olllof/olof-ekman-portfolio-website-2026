@@ -12,9 +12,10 @@ const props = defineProps({
 // alongside the main hamburger menu, not replacing it. Only rendered on
 // these four pages, never on the homepage or elsewhere.
 const categoryNav = [
-    { uid: 'portraits', label: 'Portraits' },
-    { uid: 'weddings', label: 'Weddings' },
-    { uid: 'festivals', label: 'Festivals' },
+    { uid: 'portraits', label: 'Portraits', path: '/posts/portraits' },
+    { uid: 'weddings', label: 'Weddings', path: '/posts/weddings' },
+    { uid: 'festivals', label: 'Festivals', path: '/posts/festivals' },
+    { uid: 'prints', label: 'Prints', path: '/prints' },
 ]
 
 const { client } = usePrismic()
@@ -89,7 +90,7 @@ const desktopColumns = computed(() => distributeColumns(3))
     nav.category-nav.mb-6
         nuxt-link.underline-hover(
             v-for='item in categoryNav' :key='item.uid'
-            :to='`/posts/${item.uid}`'
+            :to='item.path'
             :class='item.uid === uid ? "menu-color" : ""'
         ) {{ item.label }}
 
