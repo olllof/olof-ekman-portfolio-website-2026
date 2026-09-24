@@ -111,7 +111,6 @@ const hoverTitleStyle = (item, i) => {
         font-family: 'Inter', Arial, Helvetica, sans-serif
         font-weight: 400
         font-size: 0.95rem
-        opacity: 0.7
         max-width: 34ch
         line-height: 1.4
         text-shadow: none

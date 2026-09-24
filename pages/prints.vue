@@ -98,7 +98,7 @@ const openLightbox = (i) => {
             prismic-link.underline-hover.mono.uppercase(v-if='aboutCtaLabel' :field='aboutCtaLink' class='text-xs') {{ aboutCtaLabel }} →
         .hero-media(v-if='hero.image')
             img.w-full.object-cover.cursor-pointer(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]' @click='openLightbox(0)')
-            .flex.justify-between.items-center.mt-2.mono.opacity-70(class='text-xs')
+            .flex.justify-between.items-center.mt-2.mono(class='text-xs')
                 span {{ hero.caption }}
                 span.menu-color {{ formatPrice(hero.price) }}
             nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(hero)' class='text-xs') Order →
@@ -133,8 +133,8 @@ const openLightbox = (i) => {
 
     .band.grid.gap-8.pt-8(class='md_grid-cols-3 border-t border-white/10')
         h2.uppercase.font-b(class='text-[2.2rem] md_text-[2.8rem] leading-[0.92]') {{ bandHeading }}
-        p.opacity-70(class='text-sm max-w-[38ch] self-center') {{ bandDescription }}
-        .specs.flex.flex-col.gap-2.justify-center.mono.uppercase(class='text-xs opacity-70')
+        p(class='text-sm max-w-[38ch] self-center') {{ bandDescription }}
+        .specs.flex.flex-col.gap-2.justify-center.mono.uppercase(class='text-xs')
             div(v-for='(spec, i) in specs' :key='i' class='pl-3 border-l border-white/15') {{ spec }}
 
     PostGallery(

@@ -78,10 +78,10 @@ const submit = async () => {
         .divider.mb-8
 
         .info-block.mb-6
-            .mono.uppercase.text-xs.opacity-60.mb-1 Email
+            .mono.uppercase.text-xs.mb-1 Email
             a.underline-hover(:href='`mailto:${email}`') {{ email }}
         .info-block
-            .mono.uppercase.text-xs.opacity-60.mb-1 Instagram
+            .mono.uppercase.text-xs.mb-1 Instagram
             prismic-link.underline-hover(:field='instagramLink') {{ instagramHandle }}
 </template>
 

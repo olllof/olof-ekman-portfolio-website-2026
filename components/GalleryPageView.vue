@@ -102,7 +102,7 @@ const desktopColumns = computed(() => distributeColumns(3))
             prismic-link.underline-hover.mono.uppercase(v-if='ctaLabel' :field='ctaLink' class='text-xs') {{ ctaLabel }} →
         .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption || title' class='h-[260px] md_h-[420px]')
-            .mt-2.mono.opacity-70(v-if='hero.caption' class='text-xs') {{ hero.caption }}
+            .mt-2.mono(v-if='hero.caption' class='text-xs') {{ hero.caption }}
 
     .gallery.pb-8
         .gallery-grid.flex.md_hidden
