@@ -3,8 +3,17 @@ const { isMobile } = useDevice()
 
 const uid = useRoute().params.uid
 const { client } = usePrismic()
+
+// Redesigned pages (Portraits, Weddings, Festivals, Families) now live as
+// "gallery_page" documents. If one exists for this uid, it takes over the
+// route entirely and the old "post" document is left alone in Prismic —
+// still there, just no longer linked from anywhere.
+const { data: galleryPage } = await useAsyncData(`redesign-${uid}`, () =>
+    client.getByUID('gallery_page', uid).catch(() => null)
+)
+
 const { data: post } = await useAsyncData('post', () =>
-    client.getByUID('post', uid)
+    galleryPage.value ? Promise.resolve(null) : client.getByUID('post', uid)
 )
 
 const postTitle = computed(() => (post.value?.data?.title?.[0]?.text || post.value?.data?.short_title || 'Olof Ekman').trim())
@@ -153,7 +162,8 @@ const embedSize = (item, type) => {
 </script>
 
 <template lang="pug">
-#page._container._mx-auto(class='min-h-[92vh]')
+GalleryPageView(v-if='galleryPage' :uid='uid')
+#page._container._mx-auto(v-else class='min-h-[92vh]')
     template(v-if='!post || !post?.uid')
         .mx-4.py-4.md_mx-6.md_py-6.xl_mx-8.xl_py-8
             h1 404
