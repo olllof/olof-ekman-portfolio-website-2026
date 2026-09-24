@@ -126,7 +126,7 @@ const desktopColumns = computed(() => distributeColumns(3))
 #gallery-page-view
     .page-title
         display: block
-        font-size: clamp(2.2rem, 11vw, 4.5rem)
+        font-size: clamp(1.3rem, calc((100vw - 4.5rem) / 8), 4.5rem)
         line-height: 0.86
         @media (min-width: 768px)
             font-size: 4.5rem
