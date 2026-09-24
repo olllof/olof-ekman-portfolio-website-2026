@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
             'Content-Type': 'application/json',
         },
         body: {
-            from: 'Olof Ekman website <onboarding@resend.dev>',
+            from: 'Olof Ekman website <hello@olofekman.com>',
             to: [config.contactToEmail || 'hello@olofekman.com'],
             reply_to: email,
             subject: subject ? `[Contact form] ${subject}` : `[Contact form] New message from ${name}`,
