@@ -54,9 +54,17 @@ const openLightbox = (i) => {
 // of the browser's height-balanced `columns` fill, which is unpredictable
 // from the Prismic editor's point of view. Each column then just stacks
 // its images naturally (no cropping), so the visual style is unchanged.
+// An image can also be pinned to a specific column via its "Column" field
+// in Prismic (left on "Auto" otherwise), which overrides the round-robin
+// for just that image. Column numbers above the column count wrap around
+// (e.g. column 3 on the 2-column mobile layout folds into column 1).
 const distributeColumns = (n) => {
     const cols = Array.from({ length: n }, () => [])
-    items.value.forEach((item, i) => cols[i % n].push({ item, i }))
+    items.value.forEach((item, i) => {
+        const pinned = parseInt(item.column, 10)
+        const col = pinned >= 1 ? (pinned - 1) % n : i % n
+        cols[col].push({ item, i })
+    })
     return cols
 }
 const mobileColumns = computed(() => distributeColumns(2))
