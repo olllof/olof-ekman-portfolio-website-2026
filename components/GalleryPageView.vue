@@ -48,6 +48,19 @@ const openLightbox = (i) => {
     galleryIndex.value = i
     galleryOpen.value = true
 }
+
+// Deterministic column placement: image 1 goes to column 1, image 2 to
+// column 2, image 3 to column 3, image 4 back to column 1, etc. — instead
+// of the browser's height-balanced `columns` fill, which is unpredictable
+// from the Prismic editor's point of view. Each column then just stacks
+// its images naturally (no cropping), so the visual style is unchanged.
+const distributeColumns = (n) => {
+    const cols = Array.from({ length: n }, () => [])
+    items.value.forEach((item, i) => cols[i % n].push({ item, i }))
+    return cols
+}
+const mobileColumns = computed(() => distributeColumns(2))
+const desktopColumns = computed(() => distributeColumns(3))
 </script>
 
 <template lang="pug">
@@ -55,25 +68,39 @@ const openLightbox = (i) => {
 
     .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
         div
-            h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') {{ title }}
+            h1.uppercase.font-b.page-title.mb-4 {{ title }}
             p.mb-4(v-if='tagline' class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
             p.mb-6(v-if='description' class='max-w-[34ch] opacity-70 text-sm') {{ description }}
         .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption || title' class='h-[260px] md_h-[420px]')
             .mt-2.mono.opacity-70(v-if='hero.caption' class='text-xs') {{ hero.caption }}
 
-    .gallery.pb-8(class='columns-2 md_columns-3')
-        a.gallery-card.block.cursor-pointer(
-            v-for='(item, i) in items' :key='i'
-            href='#'
-            @click.prevent='openLightbox(i + 1)'
-            style='break-inside: avoid;'
-        )
-            .thumb.relative.overflow-hidden(style='background: #15171d;')
-                img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption || item.image.alt')
-            .cap.pt-2(v-if='item.caption')
-                .text-sm {{ item.caption }}
-                .cap-line
+    .gallery.pb-8
+        .gallery-grid.flex.md_hidden
+            .gallery-col(v-for='(col, ci) in mobileColumns' :key='"m" + ci')
+                a.gallery-card.cursor-pointer(
+                    v-for='{ item, i } in col' :key='i'
+                    href='#'
+                    @click.prevent='openLightbox(i + 1)'
+                )
+                    .thumb.relative.overflow-hidden(style='background: #15171d;')
+                        img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption || item.image.alt')
+                    .cap.pt-2(v-if='item.caption')
+                        .text-sm {{ item.caption }}
+                        .cap-line
+
+        .gallery-grid.hidden.md_flex
+            .gallery-col(v-for='(col, ci) in desktopColumns' :key='"d" + ci')
+                a.gallery-card.cursor-pointer(
+                    v-for='{ item, i } in col' :key='i'
+                    href='#'
+                    @click.prevent='openLightbox(i + 1)'
+                )
+                    .thumb.relative.overflow-hidden(style='background: #15171d;')
+                        img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption || item.image.alt')
+                    .cap.pt-2(v-if='item.caption')
+                        .text-sm {{ item.caption }}
+                        .cap-line
 
     PostGallery(
         v-model='galleryOpen'
@@ -85,12 +112,28 @@ const openLightbox = (i) => {
 
 <style lang="sass">
 #gallery-page-view
-    .gallery
-        column-gap: 2.5rem
+    .page-title
+        display: block
+        font-size: clamp(2.2rem, 11vw, 4.5rem)
+        line-height: 0.86
+        @media (min-width: 768px)
+            font-size: 4.5rem
+
+    .gallery-grid
+        gap: 1.75rem
+        @media (min-width: 768px)
+            gap: 2.5rem
+
+    .gallery-col
+        flex: 1
+        min-width: 0
+        display: flex
+        flex-direction: column
+        gap: 1.75rem
+        @media (min-width: 768px)
+            gap: 2.5rem
 
     .gallery-card
-        margin-bottom: 2.5rem
-
         .thumb img
             transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)
 
