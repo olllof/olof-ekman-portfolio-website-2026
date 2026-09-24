@@ -47,11 +47,11 @@ const isHome = computed(() => currentRoute.value === "/")
                     nuxt-link(to='/residents' @click='toggleMenu')
                         .menu-item Residents
                 .menu-item
-                    nuxt-link(to='/prints' @click='toggleMenu')
-                        .menu-item Prints
-                .menu-item
                     nuxt-link(to='/about' @click='toggleMenu')
                         .menu-item About
+                .menu-item
+                    nuxt-link(to='/prints' @click='toggleMenu')
+                        .menu-item Prints
                 .menu-item
                     nuxt-link(to='/contact' @click='toggleMenu')
                         .menu-item Contact
