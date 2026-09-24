@@ -8,6 +8,16 @@ const props = defineProps({
     uid: { type: String, required: true },
 })
 
+// Quick cross-navigation between the four redesigned gallery pages —
+// alongside the main hamburger menu, not replacing it. Only rendered on
+// these four pages, never on the homepage or elsewhere.
+const categoryNav = [
+    { uid: 'portraits', label: 'Portraits' },
+    { uid: 'weddings', label: 'Weddings' },
+    { uid: 'festivals', label: 'Festivals' },
+    { uid: 'families', label: 'Families' },
+]
+
 const { client } = usePrismic()
 const { data: page } = await useAsyncData(`gallery-page-${props.uid}`, () =>
     client.getByUID('gallery_page', props.uid)
@@ -77,6 +87,13 @@ const desktopColumns = computed(() => distributeColumns(3))
 <template lang="pug">
 #gallery-page-view.mx-4.py-4.md_mx-6.md_py-6.xl_mx-8.xl_py-8(class='min-h-[92vh]')
 
+    nav.category-nav.flex.flex-wrap.justify-center.gap-x-6.gap-y-2.mb-6
+        nuxt-link.underline-hover(
+            v-for='item in categoryNav' :key='item.uid'
+            :to='`/posts/${item.uid}`'
+            :class='item.uid === uid ? "menu-color" : ""'
+        ) {{ item.label }}
+
     .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
         div
             h1.uppercase.font-b.page-title.mb-4 {{ title }}
@@ -124,6 +141,13 @@ const desktopColumns = computed(() => distributeColumns(3))
 
 <style lang="sass">
 #gallery-page-view
+    .category-nav
+        font-size: 0.8rem
+        letter-spacing: 0.03em
+        a
+            text-transform: uppercase
+            font-weight: 500
+
     .page-title
         display: block
         font-size: clamp(1.3rem, calc((100vw - 4.5rem) / 8), 4.5rem)
