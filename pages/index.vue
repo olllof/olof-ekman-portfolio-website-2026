@@ -6,7 +6,6 @@ const { data: homepage } = await useAsyncData('homepage', () => client.getSingle
 useSeoMeta({
     ogTitle: 'Olof Ekman — Photographer based in Berlin',
     description: () => richTextToPlain(homepage.value?.data?.body) || 'Portraits, weddings, families and prints by Berlin-based photographer Olof Ekman.',
-    ogImage: () => homepage.value?.data?.image?.url,
 })
 
 // Default menu shown before any menu items are added in Prismic.

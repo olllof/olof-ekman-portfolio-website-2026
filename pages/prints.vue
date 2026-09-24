@@ -90,6 +90,8 @@ const openLightbox = (i) => {
 <template lang="pug">
 #prints-page.mx-4.py-4.md_mx-6.md_py-6.xl_mx-8.xl_py-8(class='min-h-[92vh]')
 
+    category-nav(active='prints')
+
     .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
         div
             h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') {{ title }}

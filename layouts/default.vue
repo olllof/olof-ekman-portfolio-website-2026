@@ -11,6 +11,10 @@ useSeoMeta({
     ogSiteName: 'Olof Ekman',
     ogType: 'website',
     twitterCard: 'summary_large_image',
+    // Default share preview image — pages with their own hero photo (Prints,
+    // Contact, the gallery pages) override this with their own ogImage.
+    ogImage: 'https://images.prismic.io/olof-ekman/lsVhyx-VL1eeI0wC_R1-05970-030A.jpg?auto=format,compress&w=1200',
+    twitterImage: 'https://images.prismic.io/olof-ekman/lsVhyx-VL1eeI0wC_R1-05970-030A.jpg?auto=format,compress&w=1200',
 })
 
 const router = useRouter()

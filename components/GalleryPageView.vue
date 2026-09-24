@@ -8,16 +8,6 @@ const props = defineProps({
     uid: { type: String, required: true },
 })
 
-// Quick cross-navigation between the four redesigned gallery pages —
-// alongside the main hamburger menu, not replacing it. Only rendered on
-// these four pages, never on the homepage or elsewhere.
-const categoryNav = [
-    { uid: 'portraits', label: 'Portraits', path: '/posts/portraits' },
-    { uid: 'weddings', label: 'Weddings', path: '/posts/weddings' },
-    { uid: 'festivals', label: 'Festivals', path: '/posts/festivals' },
-    { uid: 'prints', label: 'Prints', path: '/prints' },
-]
-
 const { client } = usePrismic()
 const { data: page } = await useAsyncData(`gallery-page-${props.uid}`, () =>
     client.getByUID('gallery_page', props.uid)
@@ -87,12 +77,7 @@ const desktopColumns = computed(() => distributeColumns(3))
 <template lang="pug">
 #gallery-page-view.mx-4.py-4.md_mx-6.md_py-6.xl_mx-8.xl_py-8(class='min-h-[92vh]')
 
-    nav.category-nav.mb-6
-        nuxt-link.underline-hover(
-            v-for='item in categoryNav' :key='item.uid'
-            :to='item.path'
-            :class='item.uid === uid ? "menu-color" : ""'
-        ) {{ item.label }}
+    category-nav(:active='uid')
 
     .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
         div
@@ -141,21 +126,6 @@ const desktopColumns = computed(() => distributeColumns(3))
 
 <style lang="sass">
 #gallery-page-view
-    .category-nav
-        display: flex
-        flex-wrap: nowrap
-        justify-content: center
-        gap: clamp(0.5rem, 3vw, 1.5rem)
-        letter-spacing: 0.03em
-        -webkit-text-size-adjust: 100%
-        text-size-adjust: 100%
-        overflow-x: auto
-        padding-bottom: 2px
-        a
-            flex: none
-            text-transform: uppercase
-            font-weight: 500
-            font-size: clamp(0.45rem, calc((100vw - 4.5rem) / 30), 0.8rem)
 
     .page-title
         display: block
