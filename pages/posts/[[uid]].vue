@@ -4,16 +4,22 @@ const { isMobile } = useDevice()
 const uid = useRoute().params.uid
 const { client } = usePrismic()
 
+// Pages pulled offline on purpose (content not ready yet) but kept as
+// documents in Prismic — just never routed to, so they 404 regardless of
+// their publish state there.
+const DISABLED_UIDS = ['families']
+const isDisabled = DISABLED_UIDS.includes(uid)
+
 // Redesigned pages (Portraits, Weddings, Festivals, Families) now live as
 // "gallery_page" documents. If one exists for this uid, it takes over the
 // route entirely and the old "post" document is left alone in Prismic —
 // still there, just no longer linked from anywhere.
 const { data: galleryPage } = await useAsyncData(`redesign-${uid}`, () =>
-    client.getByUID('gallery_page', uid).catch(() => null)
+    isDisabled ? Promise.resolve(null) : client.getByUID('gallery_page', uid).catch(() => null)
 )
 
 const { data: post } = await useAsyncData('post', () =>
-    galleryPage.value ? Promise.resolve(null) : client.getByUID('post', uid)
+    (isDisabled || galleryPage.value) ? Promise.resolve(null) : client.getByUID('post', uid)
 )
 
 const postTitle = computed(() => (post.value?.data?.title?.[0]?.text || post.value?.data?.short_title || 'Olof Ekman').trim())

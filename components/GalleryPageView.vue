@@ -15,7 +15,6 @@ const categoryNav = [
     { uid: 'portraits', label: 'Portraits' },
     { uid: 'weddings', label: 'Weddings' },
     { uid: 'festivals', label: 'Festivals' },
-    { uid: 'families', label: 'Families' },
 ]
 
 const { client } = usePrismic()

@@ -77,7 +77,7 @@ const hoverTitleStyle = (item, i) => {
                     @mouseenter='hoverN = i'
                     @mouseleave='hoverN = null'
                 )
-                    nuxt-link(v-if='item.link?.uid' :to='`/posts/${item.link.uid}`')
+                    prismic-link(v-if='item.link?.uid || item.link?.url' :field='item.link')
                         .pb-1.hover-title.font-b.uppercase.menu-title(:style='hoverTitleStyle(item, i)')
                             | {{ item.title }}
                     .pb-1.hover-title.font-b.uppercase.menu-title(v-else :style='hoverTitleStyle(item, i)')
