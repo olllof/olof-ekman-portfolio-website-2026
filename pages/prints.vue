@@ -14,6 +14,12 @@ const specs = computed(() => {
     return list.length ? list : ['Fine art paper', 'Archival pigment inks', 'Printed in Berlin', 'Signed by Olof']
 })
 
+// Both optional — no button at all unless a label is set in Prismic.
+const aboutCtaLabel = computed(() => d.value.about_cta_label || '')
+const aboutCtaLink = computed(() => d.value.about_cta_link)
+const viewAllCtaLabel = computed(() => d.value.view_all_cta_label || '')
+const viewAllCtaLink = computed(() => d.value.view_all_cta_link)
+
 const hero = computed(() => ({
     image: d.value.hero_image?.url || '',
     caption: d.value.hero_caption || '',
@@ -82,7 +88,7 @@ const openLightbox = (i) => {
             h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') {{ title }}
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
             p.mb-6(class='max-w-[34ch] text-sm') {{ description }}
-            nuxt-link.underline-hover.mono.uppercase(to='/prints#about' class='text-xs') About prints →
+            prismic-link.underline-hover.mono.uppercase(v-if='aboutCtaLabel' :field='aboutCtaLink' class='text-xs') {{ aboutCtaLabel }} →
         .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]')
             .flex.justify-between.mt-2.mono.opacity-70(class='text-xs')
@@ -113,7 +119,7 @@ const openLightbox = (i) => {
                 .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
                 .cap-line
 
-    nuxt-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(to='/prints' class='text-xs border border-white/15 px-4 py-3') View all prints →
+    prismic-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(v-if='viewAllCtaLabel' :field='viewAllCtaLink' class='text-xs border border-white/15 px-4 py-3') {{ viewAllCtaLabel }} →
 
     .band.grid.gap-8.pt-8(class='md_grid-cols-3 border-t border-white/10')
         h2.uppercase.font-b(class='text-[2.2rem] md_text-[2.8rem] leading-[0.92]') {{ bandHeading }}
