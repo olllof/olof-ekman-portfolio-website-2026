@@ -92,7 +92,7 @@ const openLightbox = (i) => {
 
     category-nav(active='prints')
 
-    .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
+    .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b' style='border-color: color-mix(in srgb, currentColor 10%, transparent);')
         div
             h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') {{ title }}
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
@@ -131,13 +131,13 @@ const openLightbox = (i) => {
                 .cap-line
                 nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(item)' class='text-xs') Order →
 
-    prismic-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(v-if='viewAllCtaLabel' :field='viewAllCtaLink' class='text-xs border border-white/15 px-4 py-3') {{ viewAllCtaLabel }} →
+    prismic-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(v-if='viewAllCtaLabel' :field='viewAllCtaLink' class='text-xs border px-4 py-3' style='border-color: color-mix(in srgb, currentColor 15%, transparent);') {{ viewAllCtaLabel }} →
 
-    .band.grid.gap-8.pt-8(class='md_grid-cols-3 border-t border-white/10')
+    .band.grid.gap-8.pt-8(class='md_grid-cols-3 border-t' style='border-color: color-mix(in srgb, currentColor 10%, transparent);')
         h2.uppercase.font-b(class='text-[2.2rem] md_text-[2.8rem] leading-[0.92]') {{ bandHeading }}
         p(class='text-sm max-w-[38ch] self-center') {{ bandDescription }}
         .specs.flex.flex-col.gap-2.justify-center.mono.uppercase(class='text-xs')
-            div(v-for='(spec, i) in specs' :key='i' class='pl-3 border-l border-white/15') {{ spec }}
+            div(v-for='(spec, i) in specs' :key='i' class='pl-3 border-l' style='border-color: color-mix(in srgb, currentColor 15%, transparent);') {{ spec }}
 
     PostGallery(
         v-model='galleryOpen'
@@ -166,6 +166,6 @@ const openLightbox = (i) => {
     .cap-line
         width: 2rem
         height: 1px
-        background: rgba(255,255,255,0.3)
+        background: color-mix(in srgb, currentColor 30%, transparent)
         margin-top: 0.5rem
 </style>

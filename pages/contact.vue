@@ -102,7 +102,7 @@ const submit = async () => {
     input, textarea
         background: transparent
         border: none
-        border-bottom: 1px solid rgba(255,255,255,0.25)
+        border-bottom: 1px solid color-mix(in srgb, currentColor 25%, transparent)
         color: inherit
         font-family: inherit
         font-size: 1rem
@@ -111,7 +111,7 @@ const submit = async () => {
         transition: border-color 0.2s ease
         resize: vertical
         &:focus
-            border-bottom-color: rgba(255,255,255,0.8)
+            border-bottom-color: color-mix(in srgb, currentColor 80%, transparent)
 
     button[type='submit']
         background: none
@@ -125,5 +125,5 @@ const submit = async () => {
     .divider
         width: 2rem
         height: 1px
-        background: rgba(255,255,255,0.3)
+        background: color-mix(in srgb, currentColor 30%, transparent)
 </style>

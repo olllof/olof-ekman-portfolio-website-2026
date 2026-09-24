@@ -79,7 +79,7 @@ const desktopColumns = computed(() => distributeColumns(3))
 
     category-nav(:active='uid')
 
-    .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b border-white/10')
+    .hero.grid.gap-8.items-end.pb-8.mb-8(class='md_grid-cols-[1.05fr_1fr] border-b' style='border-color: color-mix(in srgb, currentColor 10%, transparent);')
         div
             h1.uppercase.font-b.page-title.mb-4 {{ title }}
             p.mb-4(v-if='tagline' class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
@@ -158,6 +158,6 @@ const desktopColumns = computed(() => distributeColumns(3))
     .cap-line
         width: 2rem
         height: 1px
-        background: rgba(255,255,255,0.3)
+        background: color-mix(in srgb, currentColor 30%, transparent)
         margin-top: 0.5rem
 </style>
