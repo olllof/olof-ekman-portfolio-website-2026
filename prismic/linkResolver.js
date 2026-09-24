@@ -6,6 +6,7 @@ export default function linkResolver(doc) {
     // Draft redesign pages — not the live /posts/{uid} route yet.
     if (doc.type === 'gallery_page') return `/posts/${doc.uid}-preview`
     if (doc.type === 'prints_page') return '/prints'
+    if (doc.type === 'contact_page') return '/contact'
     if (doc.type === 'page') return `/${doc.uid}`
     return '/'
 }

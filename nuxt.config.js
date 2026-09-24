@@ -3,6 +3,12 @@ import pugPlugin from "vite-plugin-pug"
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     devtools: { enabled: true },
+    runtimeConfig: {
+        // Server-only — set RESEND_API_KEY (and optionally CONTACT_TO_EMAIL)
+        // in .env locally and in Vercel's project environment variables.
+        resendApiKey: process.env.RESEND_API_KEY,
+        contactToEmail: process.env.CONTACT_TO_EMAIL || 'hello@olofekman.com',
+    },
     app: {
         head: {
             charset: "utf-8",

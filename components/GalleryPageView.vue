@@ -81,8 +81,8 @@ const desktopColumns = computed(() => distributeColumns(3))
         div
             h1.uppercase.font-b.page-title.mb-4 {{ title }}
             p.mb-4(v-if='tagline' class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
-            p.mb-6(v-if='description' class='max-w-[34ch] opacity-70 text-sm') {{ description }}
-            prismic-link.cta-link.mono.uppercase(v-if='ctaLabel' :field='ctaLink' class='text-xs') {{ ctaLabel }} →
+            p.mb-6(v-if='description' class='max-w-[34ch] text-sm') {{ description }}
+            prismic-link.underline-hover.mono.uppercase(v-if='ctaLabel' :field='ctaLink' class='text-xs') {{ ctaLabel }} →
         .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption || title' class='h-[260px] md_h-[420px]')
             .mt-2.mono.opacity-70(v-if='hero.caption' class='text-xs') {{ hero.caption }}
@@ -124,12 +124,6 @@ const desktopColumns = computed(() => distributeColumns(3))
 
 <style lang="sass">
 #gallery-page-view
-    .cta-link
-        display: inline-block
-        text-decoration: none
-        &:hover
-            text-decoration: underline
-
     .page-title
         display: block
         font-size: clamp(2.2rem, 11vw, 4.5rem)

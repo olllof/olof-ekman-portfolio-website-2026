@@ -73,7 +73,7 @@ const openLightbox = (i) => {
         div
             h1.uppercase.font-b(class='text-[3rem] md_text-[4.5rem] leading-[0.86] mb-4') {{ title }}
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
-            p.mb-6(class='max-w-[34ch] opacity-70 text-sm') {{ description }}
+            p.mb-6(class='max-w-[34ch] text-sm') {{ description }}
             nuxt-link.underline-hover.mono.uppercase(to='/prints#about' class='text-xs') About prints →
         .hero-media.relative.cursor-pointer(v-if='hero.image' @click='openLightbox(0)')
             img.w-full.object-cover(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]')
