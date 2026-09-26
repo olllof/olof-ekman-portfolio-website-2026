@@ -37,6 +37,10 @@ watch(() => props.modelValue, (open) => {
     } else {
         document.body.style.overflow = ''
         isDragging.value = false
+        // The Swiper instance is destroyed when the lightbox unmounts (v-if
+        // above), so this ref would otherwise still point at a dead
+        // instance next time a stray pointerup fires the window listener.
+        swiperRef.value = null
     }
 })
 
@@ -53,6 +57,34 @@ const resetZoom = () => {
     offsetY.value = 0
 }
 
+// The active slide's rendered (pre-transform) size, used to work out how
+// far the image can be panned at the current zoom level. `offsetWidth` /
+// `offsetHeight` reflect the element's layout box, which CSS `transform`
+// never changes, so this stays accurate while zoomed and while panning.
+const getActiveImg = () => document.querySelector('.post-gallery .swiper-slide-active img')
+
+const clampOffsets = () => {
+    const img = getActiveImg()
+    if (!img) return
+    const boundX = Math.max(0, (img.offsetWidth * (currentZoom.value - 1)) / 2)
+    const boundY = Math.max(0, (img.offsetHeight * (currentZoom.value - 1)) / 2)
+    offsetX.value = Math.max(-boundX, Math.min(boundX, offsetX.value))
+    offsetY.value = Math.max(-boundY, Math.min(boundY, offsetY.value))
+}
+
+// Used by the zoom slider and its +/- buttons.
+const setZoom = (v) => {
+    currentZoom.value = Math.max(1, Math.min(8, v))
+    clampOffsets()
+}
+const zoomModel = computed({
+    get: () => currentZoom.value,
+    set: (v) => setZoom(v),
+})
+// Where the slider thumb sits along the track, as a percentage — drives the
+// black/grey fill split either side of it (see the `--fill` CSS variable).
+const zoomFillPercent = computed(() => ((currentZoom.value - 1) / 7) * 100)
+
 const onImageLoad = (i) => {
     loadedSlides.value = new Set([...loadedSlides.value, i])
 }
@@ -68,12 +100,7 @@ const handleWheel = (e) => {
     e.preventDefault()
     const delta = e.deltaY > 0 ? 0.9 : 1.1
     currentZoom.value = Math.max(1, Math.min(8, currentZoom.value * delta))
-
-    // Reset offset when fully zoomed out
-    if (currentZoom.value <= 1) {
-        offsetX.value = 0
-        offsetY.value = 0
-    }
+    clampOffsets()
 }
 
 const handlePointerDown = (e) => {
@@ -91,14 +118,13 @@ const handlePointerDown = (e) => {
 const handlePointerMove = (e) => {
     if (!isDragging.value || currentZoom.value <= 1) return
 
-    const deltaX = e.clientX - dragStartX.value
-    const deltaY = e.clientY - dragStartY.value
-
-    // Pan range scales with zoom so the edges/corners of a heavily zoomed
-    // image are actually reachable, not just a slightly-wider center crop.
-    const bound = 150 * currentZoom.value
-    offsetX.value = Math.max(-bound, Math.min(bound, offsetX.value + deltaX))
-    offsetY.value = Math.max(-bound, Math.min(bound, offsetY.value + deltaY))
+    // offsetX/Y are applied to the image in screen pixels (the translate
+    // happens after the scale — see the template), so a pointer delta of
+    // d screen pixels should always move the image by d pixels on screen,
+    // regardless of zoom level.
+    offsetX.value += e.clientX - dragStartX.value
+    offsetY.value += e.clientY - dragStartY.value
+    clampOffsets()
 
     dragStartX.value = e.clientX
     dragStartY.value = e.clientY
@@ -162,12 +188,7 @@ const handleTouchMove = (e) => {
         const ratio = currentDistance / lastTouchDistance.value
         currentZoom.value = Math.max(1, Math.min(8, currentZoom.value * ratio))
         lastTouchDistance.value = currentDistance
-
-        // Reset offset when fully zoomed out
-        if (currentZoom.value <= 1) {
-            offsetX.value = 0
-            offsetY.value = 0
-        }
+        clampOffsets()
     }
 }
 
@@ -209,24 +230,42 @@ Teleport(to='body')
             ).h-full
                 SwiperSlide(v-for='(img, i) in images' :key='i').flex.items-center.justify-center.overflow-hidden
                     .spinner(v-if='!loadedSlides.has(i)')
-                    .image-wrapper(
-                        @wheel='handleWheel'
-                        @pointerdown='handlePointerDown'
-                        @pointermove='handlePointerMove'
-                        @dblclick='handleDoubleClick'
-                        @touchstart='handleTouchStart'
-                        @touchmove='handleTouchMove'
-                        @touchend='handleTouchEnd'
-                    ).w-full.h-full.flex.items-center.justify-center.overflow-hidden(
-                        :class='{ "cursor-grab": currentZoom > 1, "cursor-zoom-in": currentZoom === 1, "cursor-grabbing": isDragging }'
-                    )
-                        img(
-                            :src='img.url.split("?")[0] + "?auto=format,compress&fit=max&h=4000"'
-                            :alt='img.alt || ""'
-                            loading='lazy'
-                            @load='onImageLoad(i)'
-                            :style='{ transform: `scale(${currentZoom}) translate(${offsetX}px, ${offsetY}px)`, transition: isDragging ? "none" : "transform 0.15s ease-out" }'
-                        ).max-h-full.max-w-full.object-contain.user-select-none.select-none.pointer-events-none
+                    .polaroid-frame
+                        .image-wrapper(
+                            @wheel='handleWheel'
+                            @pointerdown='handlePointerDown'
+                            @pointermove='handlePointerMove'
+                            @dblclick='handleDoubleClick'
+                            @touchstart='handleTouchStart'
+                            @touchmove='handleTouchMove'
+                            @touchend='handleTouchEnd'
+                            :class='{ "cursor-grab": currentZoom > 1, "cursor-zoom-in": currentZoom === 1, "cursor-grabbing": isDragging }'
+                        )
+                            img(
+                                :src='img.url.split("?")[0] + "?auto=format,compress&fit=max&h=4000"'
+                                :alt='img.alt || ""'
+                                loading='lazy'
+                                @load='onImageLoad(i)'
+                                :style='{ transform: `translate(${offsetX}px, ${offsetY}px) scale(${currentZoom})`, transition: isDragging ? "none" : "transform 0.15s ease-out" }'
+                            ).user-select-none.select-none.pointer-events-none
+
+                        .zoom-bar.mono
+                            button.zoom-btn(@click='setZoom(currentZoom - 1)' aria-label='Zoom out')
+                                svg(xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round')
+                                    circle(cx='11' cy='11' r='7')
+                                    line(x1='21' y1='21' x2='16.65' y2='16.65')
+                                    line(x1='8' y1='11' x2='14' y2='11')
+                            input.zoom-slider(
+                                type='range' min='1' max='8' step='0.1'
+                                v-model.number='zoomModel'
+                                :style='{ "--fill": zoomFillPercent + "%" }'
+                            )
+                            button.zoom-btn(@click='setZoom(currentZoom + 1)' aria-label='Zoom in')
+                                svg(xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round')
+                                    circle(cx='11' cy='11' r='7')
+                                    line(x1='21' y1='21' x2='16.65' y2='16.65')
+                                    line(x1='11' y1='8' x2='11' y2='14')
+                                    line(x1='8' y1='11' x2='14' y2='11')
 </template>
 
 <style lang="sass">
@@ -234,7 +273,7 @@ Teleport(to='body')
     position: fixed
     inset: 0
     z-index: 60
-    background: rgba(0, 0, 0, 0.95)
+    background: #000
     display: flex
     align-items: center
     justify-content: center
@@ -265,11 +304,6 @@ Teleport(to='body')
         padding: 2rem
         overflow: hidden
 
-    .image-wrapper
-        touch-action: none
-        user-select: none
-        -webkit-user-select: none
-
     .swiper-button-prev,
     .swiper-button-next
         color: white !important
@@ -290,8 +324,85 @@ Teleport(to='body')
         animation: spin 0.6s linear infinite
         position: absolute
 
-    img
+    // The white "photo card" that frames each image, like a physical print
+    // with a wide bottom border for the zoom controls. Shrink-wraps to the
+    // image's own rendered size (see the `img` max-height/width below)
+    // rather than forcing every photo into the same fixed box, so a tall
+    // portrait and a wide landscape each get a naturally-proportioned card.
+    .polaroid-frame
+        display: inline-flex
+        flex-direction: column
+        max-width: min(90vw, 640px)
+        background: #fff
+        padding: 1.5rem 1.5rem 0.75rem
+        box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5)
+        border-radius: 2px
+
+    .image-wrapper
+        touch-action: none
         user-select: none
+        -webkit-user-select: none
+        display: flex
+        overflow: hidden
+        background: #15171d
+
+        img
+            display: block
+            width: auto
+            height: auto
+            max-width: 100%
+            // 84vh minus the frame's top/bottom padding and the zoom bar's
+            // own height, so the whole card still fits the viewport.
+            max-height: calc(84vh - 5.25rem)
+            user-select: none
+
+    .zoom-bar
+        flex-shrink: 0
+        display: flex
+        align-items: center
+        gap: 0.75rem
+        padding: 0.85rem 0.25rem 0.15rem
+        color: #0e0b0a
+
+    .zoom-btn
+        display: flex
+        color: inherit
+        background: none
+        border: none
+        padding: 0
+        cursor: pointer
+        opacity: 0.75
+        transition: opacity 0.2s
+        &:hover
+            opacity: 1
+
+    .zoom-slider
+        flex: 1
+        -webkit-appearance: none
+        appearance: none
+        height: 2px
+        background: linear-gradient(to right, #0e0b0a var(--fill), #d8d6d2 var(--fill))
+        cursor: pointer
+        &::-webkit-slider-thumb
+            -webkit-appearance: none
+            width: 13px
+            height: 13px
+            border-radius: 50%
+            background: #e0392b
+            cursor: pointer
+        &::-moz-range-track
+            height: 2px
+            background: #d8d6d2
+        &::-moz-range-progress
+            height: 2px
+            background: #0e0b0a
+        &::-moz-range-thumb
+            width: 13px
+            height: 13px
+            border: none
+            border-radius: 50%
+            background: #e0392b
+            cursor: pointer
 
 @keyframes spin
     to
