@@ -19,6 +19,9 @@ const dragStartX = ref(0)
 const dragStartY = ref(0)
 const lastTouchDistance = ref(0)
 const isTouchZooming = ref(false)
+const lastTapTime = ref(0)
+const lastTapX = ref(0)
+const lastTapY = ref(0)
 
 const onSwiper = (swiper) => {
     swiperRef.value = swiper
@@ -107,6 +110,24 @@ const handleDoubleClick = () => {
 }
 
 const handleTouchStart = (e) => {
+    // Manual double-tap detection: mobile browsers don't reliably
+    // synthesize a `dblclick` DOM event from two taps, especially with
+    // touch-action: none and Swiper's own touch handling on the same
+    // element, so the desktop @dblclick handler alone doesn't fire here.
+    if (e.touches.length === 1) {
+        const touch = e.touches[0]
+        const now = Date.now()
+        const dx = Math.abs(touch.clientX - lastTapX.value)
+        const dy = Math.abs(touch.clientY - lastTapY.value)
+        if (now - lastTapTime.value < 300 && dx < 30 && dy < 30) {
+            handleDoubleClick()
+            lastTapTime.value = 0
+        } else {
+            lastTapTime.value = now
+            lastTapX.value = touch.clientX
+            lastTapY.value = touch.clientY
+        }
+    }
     if (e.touches.length === 2) {
         isTouchZooming.value = true
         if (swiperRef.value) {
