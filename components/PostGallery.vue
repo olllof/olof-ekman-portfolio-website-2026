@@ -67,7 +67,7 @@ const handleWheel = (e) => {
     if (!props.modelValue) return
     e.preventDefault()
     const delta = e.deltaY > 0 ? 0.9 : 1.1
-    currentZoom.value = Math.max(1, Math.min(5, currentZoom.value * delta))
+    currentZoom.value = Math.max(1, Math.min(8, currentZoom.value * delta))
 
     // Reset offset when fully zoomed out
     if (currentZoom.value <= 1) {
@@ -94,8 +94,11 @@ const handlePointerMove = (e) => {
     const deltaX = e.clientX - dragStartX.value
     const deltaY = e.clientY - dragStartY.value
 
-    offsetX.value = Math.max(-300, Math.min(300, offsetX.value + deltaX))
-    offsetY.value = Math.max(-300, Math.min(300, offsetY.value + deltaY))
+    // Pan range scales with zoom so the edges/corners of a heavily zoomed
+    // image are actually reachable, not just a slightly-wider center crop.
+    const bound = 150 * currentZoom.value
+    offsetX.value = Math.max(-bound, Math.min(bound, offsetX.value + deltaX))
+    offsetY.value = Math.max(-bound, Math.min(bound, offsetY.value + deltaY))
 
     dragStartX.value = e.clientX
     dragStartY.value = e.clientY
@@ -110,7 +113,7 @@ const handleDoubleClick = () => {
     if (currentZoom.value > 1) {
         resetZoom()
     } else {
-        currentZoom.value = 2.5
+        currentZoom.value = 3.5
     }
 }
 
@@ -157,7 +160,7 @@ const handleTouchMove = (e) => {
             touch2.clientY - touch1.clientY
         )
         const ratio = currentDistance / lastTouchDistance.value
-        currentZoom.value = Math.max(1, Math.min(5, currentZoom.value * ratio))
+        currentZoom.value = Math.max(1, Math.min(8, currentZoom.value * ratio))
         lastTouchDistance.value = currentDistance
 
         // Reset offset when fully zoomed out
