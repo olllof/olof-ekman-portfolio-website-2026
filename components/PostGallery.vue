@@ -81,6 +81,10 @@ const handlePointerDown = (e) => {
         isDragging.value = true
         dragStartX.value = e.clientX
         dragStartY.value = e.clientY
+        // Otherwise Swiper's own swipe detection also sees this same drag
+        // and can advance to the next/previous slide while panning a
+        // zoomed-in image.
+        if (swiperRef.value) swiperRef.value.disable()
     }
 }
 
@@ -99,6 +103,7 @@ const handlePointerMove = (e) => {
 
 const handlePointerUp = () => {
     isDragging.value = false
+    if (swiperRef.value) swiperRef.value.enable()
 }
 
 const handleDoubleClick = () => {
