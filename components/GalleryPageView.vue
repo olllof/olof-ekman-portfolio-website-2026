@@ -60,7 +60,8 @@ const openLightbox = (i) => {
 // An image can also be pinned to a specific column via its "Column" field
 // in Prismic (left on "Auto" otherwise), which overrides the round-robin
 // for just that image. Column numbers above the column count wrap around
-// (e.g. column 3 on the 2-column mobile layout folds into column 1).
+// (only relevant on desktop's 3 columns — mobile is a single column, so
+// pinning has nothing to override there).
 const distributeColumns = (n) => {
     const cols = Array.from({ length: n }, () => [])
     items.value.forEach((item, i) => {
@@ -70,7 +71,7 @@ const distributeColumns = (n) => {
     })
     return cols
 }
-const mobileColumns = computed(() => distributeColumns(2))
+const mobileColumns = computed(() => distributeColumns(1))
 const desktopColumns = computed(() => distributeColumns(3))
 </script>
 

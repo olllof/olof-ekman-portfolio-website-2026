@@ -86,7 +86,7 @@ const distributeColumns = (n) => {
     })
     return cols
 }
-const mobileColumns = computed(() => distributeColumns(2))
+const mobileColumns = computed(() => distributeColumns(1))
 const desktopColumns = computed(() => distributeColumns(3))
 
 // Click any print (including the hero) to see it full-size in the same
