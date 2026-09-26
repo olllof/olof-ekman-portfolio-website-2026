@@ -249,7 +249,14 @@ Teleport(to='body')
                                 :style='{ transform: `translate(${offsetX}px, ${offsetY}px) scale(${currentZoom})`, transition: isDragging ? "none" : "transform 0.15s ease-out" }'
                             ).user-select-none.select-none.pointer-events-none
 
-                        .zoom-bar.mono
+                        .zoom-bar.mono(
+                            @touchstart.stop=''
+                            @touchmove.stop=''
+                            @touchend.stop=''
+                            @pointerdown.stop=''
+                            @pointermove.stop=''
+                            @pointerup.stop=''
+                        )
                             button.zoom-btn(@click='setZoom(currentZoom - 1)' aria-label='Zoom out')
                                 svg(xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round')
                                     circle(cx='11' cy='11' r='7')
