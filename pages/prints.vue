@@ -115,7 +115,7 @@ const openLightbox = (i) => {
             p.mb-6(class='max-w-[34ch] text-sm') {{ description }}
             prismic-link.underline-hover.mono.uppercase(v-if='aboutCtaLabel' :field='aboutCtaLink' class='text-xs') {{ aboutCtaLabel }} →
         .hero-media(v-if='hero.image')
-            img.w-full.object-cover.cursor-pointer(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' class='h-[260px] md_h-[420px]' @click='openLightbox(0)')
+            img.w-full.block.cursor-pointer(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' @click='openLightbox(0)')
             .flex.justify-between.items-center.mt-2.mono(class='text-xs')
                 span {{ hero.caption }}
                 span.menu-color {{ formatPrice(hero.price) }}
