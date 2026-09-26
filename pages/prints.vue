@@ -73,6 +73,22 @@ const stopDemo = (i) => {
     if (el) el.pause()
 }
 
+// Same deterministic column placement as the Portraits/Weddings/Festivals
+// pages: print 1 goes to column 1, print 2 to column 2, print 3 to column
+// 3, print 4 back to column 1, etc., unless pinned to a specific column via
+// its "Column" field in Prismic (left on "Auto" otherwise).
+const distributeColumns = (n) => {
+    const cols = Array.from({ length: n }, () => [])
+    prints.value.forEach((item, i) => {
+        const pinned = parseInt(item.column, 10)
+        const col = pinned >= 1 ? (pinned - 1) % n : i % n
+        cols[col].push({ item, i })
+    })
+    return cols
+}
+const mobileColumns = computed(() => distributeColumns(2))
+const desktopColumns = computed(() => distributeColumns(3))
+
 // Click any print (including the hero) to see it full-size in the same
 // zoom/pan lightbox used on the Portraits/Weddings/etc. pages.
 const allImages = computed(() => [
@@ -105,31 +121,58 @@ const openLightbox = (i) => {
                 span.menu-color {{ formatPrice(hero.price) }}
             nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(hero)' class='text-xs') Order →
 
-    .gallery.pb-8(class='columns-2 md_columns-3 gap-4' style='column-gap: 1.2rem;')
-        .print-card.block.mb-6(
-            v-for='(item, i) in prints' :key='i'
-            style='break-inside: avoid;'
-        )
-            .thumb.relative.overflow-hidden.cursor-pointer(
-                style='background: #15171d;'
-                @mouseenter='startDemo(i, item)'
-                @mouseleave='stopDemo(i)'
-                @click='openLightbox(i + 1)'
-            )
-                img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
-                video.absolute.inset-0.w-full.h-full(
-                    v-if='item.demo_video?.url'
-                    :data-print-video='i'
-                    :src='item.demo_video.url'
-                    muted loop playsinline preload='metadata'
-                    :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
+    .gallery.pb-8
+        .gallery-grid.flex.md_hidden
+            .gallery-col(v-for='(col, ci) in mobileColumns' :key='"m" + ci')
+                .print-card(
+                    v-for='{ item, i } in col' :key='i'
                 )
-                span.play-hint.mono.uppercase(v-if='item.demo_video?.url' class='text-[0.6rem]') Hover to preview
-            .cap.pt-2
-                .text-sm {{ item.caption }}
-                .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
-                .cap-line
-                nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(item)' class='text-xs') Order →
+                    .thumb.relative.overflow-hidden.cursor-pointer(
+                        style='background: #15171d;'
+                        @mouseenter='startDemo(i, item)'
+                        @mouseleave='stopDemo(i)'
+                        @click='openLightbox(i + 1)'
+                    )
+                        img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
+                        video.absolute.inset-0.w-full.h-full(
+                            v-if='item.demo_video?.url'
+                            :data-print-video='i'
+                            :src='item.demo_video.url'
+                            muted loop playsinline preload='metadata'
+                            :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
+                        )
+                        span.play-hint.mono.uppercase(v-if='item.demo_video?.url' class='text-[0.6rem]') Hover to preview
+                    .cap.pt-2
+                        .text-sm {{ item.caption }}
+                        .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
+                        .cap-line
+                        nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(item)' class='text-xs') Order →
+
+        .gallery-grid.hidden.md_flex
+            .gallery-col(v-for='(col, ci) in desktopColumns' :key='"d" + ci')
+                .print-card(
+                    v-for='{ item, i } in col' :key='i'
+                )
+                    .thumb.relative.overflow-hidden.cursor-pointer(
+                        style='background: #15171d;'
+                        @mouseenter='startDemo(i, item)'
+                        @mouseleave='stopDemo(i)'
+                        @click='openLightbox(i + 1)'
+                    )
+                        img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
+                        video.absolute.inset-0.w-full.h-full(
+                            v-if='item.demo_video?.url'
+                            :data-print-video='i'
+                            :src='item.demo_video.url'
+                            muted loop playsinline preload='metadata'
+                            :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
+                        )
+                        span.play-hint.mono.uppercase(v-if='item.demo_video?.url' class='text-[0.6rem]') Hover to preview
+                    .cap.pt-2
+                        .text-sm {{ item.caption }}
+                        .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
+                        .cap-line
+                        nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(item)' class='text-xs') Order →
 
     prismic-link.view-all.mono.uppercase.inline-flex.items-center.gap-2.mb-8(v-if='viewAllCtaLabel' :field='viewAllCtaLink' class='text-xs border px-4 py-3' style='border-color: color-mix(in srgb, currentColor 15%, transparent);') {{ viewAllCtaLabel }} →
 
@@ -149,6 +192,27 @@ const openLightbox = (i) => {
 
 <style lang="sass">
 #prints-page
+    .gallery-grid
+        gap: 1.75rem
+        @media (min-width: 768px)
+            gap: 2.5rem
+
+    .gallery-col
+        flex: 1
+        min-width: 0
+        display: flex
+        flex-direction: column
+        gap: 1.75rem
+        @media (min-width: 768px)
+            gap: 2.5rem
+
+    .print-card
+        .thumb img
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)
+
+        &:hover .thumb img
+            transform: scale(1.05)
+
     .play-hint
         position: absolute
         top: 0.6rem
