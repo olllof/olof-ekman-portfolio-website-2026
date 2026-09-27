@@ -61,7 +61,7 @@ const resetZoom = () => {
 // far the image can be panned at the current zoom level. `offsetWidth` /
 // `offsetHeight` reflect the element's layout box, which CSS `transform`
 // never changes, so this stays accurate while zoomed and while panning.
-const getActiveImg = () => document.querySelector('.post-gallery .swiper-slide-active img')
+const getActiveImg = () => document.querySelector('.post-gallery .swiper-slide-active img.full-img')
 
 const clampOffsets = () => {
     const img = getActiveImg()
@@ -227,9 +227,9 @@ Teleport(to='body')
                 :slides-per-view='1'
                 :initial-slide='initialSlide'
                 @swiper='onSwiper'
+                @slideChange='resetZoom'
             ).h-full
                 SwiperSlide(v-for='(img, i) in images' :key='i' @click.self='close').flex.items-center.justify-center.overflow-hidden
-                    .spinner(v-if='!loadedSlides.has(i)')
                     .polaroid-frame
                         .image-wrapper(
                             @wheel='handleWheel'
@@ -241,11 +241,16 @@ Teleport(to='body')
                             @touchend='handleTouchEnd'
                             :class='{ "cursor-grab": currentZoom > 1, "cursor-zoom-in": currentZoom === 1, "cursor-grabbing": isDragging }'
                         )
-                            img(
+                            img.placeholder-img(
+                                :src='img.url.split("?")[0] + "?auto=format,compress&w=900"'
+                                :alt='img.alt || ""'
+                            ).user-select-none.select-none.pointer-events-none
+                            img.full-img(
                                 :src='img.url.split("?")[0] + "?auto=format,compress&fit=max&h=4000"'
                                 :alt='img.alt || ""'
                                 loading='lazy'
                                 @load='onImageLoad(i)'
+                                :class='{ loaded: loadedSlides.has(i) }'
                                 :style='{ transform: `translate(${offsetX}px, ${offsetY}px) scale(${currentZoom})`, transition: isDragging ? "none" : "transform 0.15s ease-out" }'
                             ).user-select-none.select-none.pointer-events-none
 
@@ -322,15 +327,6 @@ Teleport(to='body')
             @media (max-width: 768px)
                 font-size: 1rem
 
-    .spinner
-        width: 24px
-        height: 24px
-        border: 2px solid rgba(255, 255, 255, 0.2)
-        border-top-color: white
-        border-radius: 50%
-        animation: spin 0.6s linear infinite
-        position: absolute
-
     // The white "photo card" that frames each image, like a physical print
     // with a wide bottom border for the zoom controls. Shrink-wraps to the
     // image's own rendered size (see the `img` max-height/width below)
@@ -349,11 +345,15 @@ Teleport(to='body')
         touch-action: none
         user-select: none
         -webkit-user-select: none
+        position: relative
         display: flex
         overflow: hidden
         background: #15171d
 
-        img
+        // Sets the box's size (from its own natural aspect ratio, same as
+        // the full-res photo) and shows instantly since it's the same
+        // already-cached thumbnail the grid just displayed.
+        .placeholder-img
             display: block
             width: auto
             height: auto
@@ -361,7 +361,23 @@ Teleport(to='body')
             // 84vh minus the frame's top/bottom padding and the zoom bar's
             // own height, so the whole card still fits the viewport.
             max-height: calc(84vh - 5.25rem)
+            filter: blur(12px)
+            transform: scale(1.03)
             user-select: none
+
+        // Fades in over the placeholder once the full-resolution version
+        // (needed for sharp zooming) has actually finished downloading.
+        .full-img
+            position: absolute
+            inset: 0
+            width: 100%
+            height: 100%
+            object-fit: contain
+            opacity: 0
+            transition: opacity 0.25s ease, transform 0.15s ease-out
+            user-select: none
+            &.loaded
+                opacity: 1
 
     .zoom-bar
         flex-shrink: 0
@@ -410,10 +426,6 @@ Teleport(to='body')
             border-radius: 50%
             background: #e0392b
             cursor: pointer
-
-@keyframes spin
-    to
-        transform: rotate(360deg)
 
 .gallery-fade-enter-active,
 .gallery-fade-leave-active
