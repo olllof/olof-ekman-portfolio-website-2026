@@ -313,7 +313,7 @@ Teleport(to='body')
         display: flex !important
         align-items: center !important
         justify-content: center !important
-        padding: 2rem
+        padding: 0.5rem
         overflow: hidden
 
     .swiper-button-prev,
@@ -327,64 +327,70 @@ Teleport(to='body')
             @media (max-width: 768px)
                 font-size: 1rem
 
-    // The white "photo card" that frames each image, like a physical print
-    // with a wide bottom border for the zoom controls. Shrink-wraps to the
-    // image's own rendered size (see the `img` max-height/width below)
-    // rather than forcing every photo into the same fixed box, so a tall
-    // portrait and a wide landscape each get a naturally-proportioned card.
+    // No more surrounding white border — the print photos already carry
+    // their own white or black border baked into the file, so this just
+    // stacks the image above a plain white strip for the zoom controls.
+    // Shrink-wraps to the image's own rendered size (see the `img`
+    // max-height/width below) so a tall portrait and a wide landscape
+    // each get a naturally-proportioned box, using as much of the
+    // viewport as possible.
     .polaroid-frame
+        position: relative
         display: inline-flex
         flex-direction: column
-        max-width: min(90vw, 640px)
-        background: #fff
-        padding: 1.5rem 1.5rem 0.75rem
-        box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5)
-        border-radius: 2px
+        max-width: calc(100vw - 1rem)
+        max-height: calc(100vh - 1rem)
 
     .image-wrapper
         touch-action: none
         user-select: none
         -webkit-user-select: none
         position: relative
-        display: flex
+        display: grid
+        place-items: center
         overflow: hidden
         background: #15171d
 
-        // Sets the box's size (from its own natural aspect ratio, same as
-        // the full-res photo) and shows instantly since it's the same
-        // already-cached thumbnail the grid just displayed.
-        .placeholder-img
+        // Both images stack in the same grid cell (rather than one being
+        // absolutely positioned over the other) so the box sizes itself
+        // to whichever is currently bigger: the small cached placeholder
+        // at first, then the full-resolution photo once it's loaded —
+        // instead of staying pinned to the placeholder's own low-res
+        // pixel size even after the sharp version is ready.
+        .placeholder-img,
+        .full-img
+            grid-area: 1 / 1
             display: block
             width: auto
             height: auto
-            max-width: 100%
-            // 84vh minus the frame's top/bottom padding and the zoom bar's
-            // own height, so the whole card still fits the viewport.
-            max-height: calc(84vh - 5.25rem)
+            max-width: calc(100vw - 1rem)
+            // 1rem for the frame's own edge clearance, plus the white
+            // zoom-bar strip's own height, so the whole stack still fits.
+            max-height: calc(100vh - 1rem - 3.25rem)
+            user-select: none
+
+        .placeholder-img
             filter: blur(12px)
             transform: scale(1.03)
-            user-select: none
 
         // Fades in over the placeholder once the full-resolution version
         // (needed for sharp zooming) has actually finished downloading.
         .full-img
-            position: absolute
-            inset: 0
-            width: 100%
-            height: 100%
-            object-fit: contain
             opacity: 0
             transition: opacity 0.25s ease, transform 0.15s ease-out
-            user-select: none
             &.loaded
                 opacity: 1
 
+    // A plain white strip directly under the photo, just wide enough for
+    // the zoom controls — the one piece of "frame" kept on purpose, since
+    // black icons need a light background to stay legible over any photo.
     .zoom-bar
         flex-shrink: 0
         display: flex
         align-items: center
         gap: 0.75rem
-        padding: 0.85rem 0.25rem 0.15rem
+        padding: 0.75rem 1rem
+        background: #fff
         color: #0e0b0a
 
     .zoom-btn
