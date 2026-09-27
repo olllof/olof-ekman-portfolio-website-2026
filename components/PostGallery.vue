@@ -228,7 +228,7 @@ Teleport(to='body')
                 :initial-slide='initialSlide'
                 @swiper='onSwiper'
             ).h-full
-                SwiperSlide(v-for='(img, i) in images' :key='i').flex.items-center.justify-center.overflow-hidden
+                SwiperSlide(v-for='(img, i) in images' :key='i' @click.self='close').flex.items-center.justify-center.overflow-hidden
                     .spinner(v-if='!loadedSlides.has(i)')
                     .polaroid-frame
                         .image-wrapper(
