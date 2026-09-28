@@ -31,16 +31,37 @@ const toggleTheme = () => { light.value = !light.value }
 
 // Nudges people to notice the theme toggle: briefly wiggles it every
 // 45s rather than leaving it silent and easy to miss in the corner.
+//
+// Mobile browsers throttle/pause setInterval while a tab is backgrounded
+// or the screen is locked (desktop tabs rarely get backgrounded the same
+// way), so relying on the interval alone meant it could go long stretches
+// without ever firing on mobile. Checking elapsed real time on
+// visibilitychange as well means it shakes as soon as someone returns to
+// the tab if 45s have already passed, rather than only while the tab
+// happened to stay continuously open and foregrounded.
+const ATTENTION_INTERVAL_MS = 45000
 const drawAttention = ref(false)
 let attentionInterval = null
+let lastShakeAt = 0
+
+const maybeShake = () => {
+    if (Date.now() - lastShakeAt < ATTENTION_INTERVAL_MS) return
+    lastShakeAt = Date.now()
+    drawAttention.value = true
+    setTimeout(() => { drawAttention.value = false }, 600)
+}
+const onVisibilityChange = () => {
+    if (document.visibilityState === 'visible') maybeShake()
+}
+
 onMounted(() => {
-    attentionInterval = setInterval(() => {
-        drawAttention.value = true
-        setTimeout(() => { drawAttention.value = false }, 600)
-    }, 45000)
+    lastShakeAt = Date.now()
+    attentionInterval = setInterval(maybeShake, ATTENTION_INTERVAL_MS)
+    document.addEventListener('visibilitychange', onVisibilityChange)
 })
 onUnmounted(() => {
     if (attentionInterval) clearInterval(attentionInterval)
+    document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 </script>
 
