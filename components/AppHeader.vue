@@ -15,7 +15,6 @@ header#app-header
                 button(
                     @click='toggleTheme'
                     :aria-label='light ? "Switch to dark background" : "Switch to light background"'
-                    :class='{ shake: drawAttention }'
                     class='mb-3 md_mb-5 h-[2.16rem] md_h-[2.88rem]'
                 ).menu-color.cursor-pointer.flex.items-center.justify-center.theme-toggle
                     //- Angel scaled ~1.2x so its head matches the devil's width
@@ -28,41 +27,6 @@ header#app-header
 <script setup>
 const light = useSiteTheme()
 const toggleTheme = () => { light.value = !light.value }
-
-// Nudges people to notice the theme toggle: briefly wiggles it every
-// 30s rather than leaving it silent and easy to miss in the corner.
-//
-// Mobile browsers throttle/pause setInterval while a tab is backgrounded
-// or the screen is locked (desktop tabs rarely get backgrounded the same
-// way), so relying on the interval alone meant it could go long stretches
-// without ever firing on mobile. Checking elapsed real time on
-// visibilitychange as well means it shakes as soon as someone returns to
-// the tab if 45s have already passed, rather than only while the tab
-// happened to stay continuously open and foregrounded.
-const ATTENTION_INTERVAL_MS = 30000
-const drawAttention = ref(false)
-let attentionInterval = null
-let lastShakeAt = 0
-
-const maybeShake = () => {
-    if (Date.now() - lastShakeAt < ATTENTION_INTERVAL_MS) return
-    lastShakeAt = Date.now()
-    drawAttention.value = true
-    setTimeout(() => { drawAttention.value = false }, 600)
-}
-const onVisibilityChange = () => {
-    if (document.visibilityState === 'visible') maybeShake()
-}
-
-onMounted(() => {
-    lastShakeAt = Date.now()
-    attentionInterval = setInterval(maybeShake, ATTENTION_INTERVAL_MS)
-    document.addEventListener('visibilitychange', onVisibilityChange)
-})
-onUnmounted(() => {
-    if (attentionInterval) clearInterval(attentionInterval)
-    document.removeEventListener('visibilitychange', onVisibilityChange)
-})
 </script>
 
 <style lang="scss" scoped>
@@ -92,22 +56,21 @@ onUnmounted(() => {
     }
 }
 
-.theme-toggle.shake {
-    animation: theme-toggle-shake 0.6s ease-in-out;
+// Continuous, gentle bob rather than a periodic shake — a plain CSS loop
+// so it doesn't depend on JS timers, which mobile browsers throttle or
+// pause while a tab is backgrounded/locked (that's why the old
+// interval-driven shake wasn't firing reliably on phones).
+.theme-toggle {
+    animation: theme-toggle-float 2.6s ease-in-out infinite;
 }
 
-@keyframes theme-toggle-shake {
-    0%, 100% { transform: rotate(0); }
-    15% { transform: rotate(-12deg); }
-    30% { transform: rotate(10deg); }
-    45% { transform: rotate(-8deg); }
-    60% { transform: rotate(6deg); }
-    75% { transform: rotate(-3deg); }
-    90% { transform: rotate(2deg); }
+@keyframes theme-toggle-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .theme-toggle.shake {
+    .theme-toggle {
         animation: none;
     }
 }
