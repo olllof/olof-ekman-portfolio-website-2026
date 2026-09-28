@@ -68,10 +68,4 @@ const toggleTheme = () => { light.value = !light.value }
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .theme-toggle {
-        animation: none;
-    }
-}
 </style>
