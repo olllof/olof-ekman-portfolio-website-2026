@@ -30,14 +30,14 @@ const light = useSiteTheme()
 const toggleTheme = () => { light.value = !light.value }
 
 // Nudges people to notice the theme toggle: briefly wiggles it every
-// minute rather than leaving it silent and easy to miss in the corner.
+// 45s rather than leaving it silent and easy to miss in the corner.
 const drawAttention = ref(false)
 let attentionInterval = null
 onMounted(() => {
     attentionInterval = setInterval(() => {
         drawAttention.value = true
         setTimeout(() => { drawAttention.value = false }, 600)
-    }, 60000)
+    }, 45000)
 })
 onUnmounted(() => {
     if (attentionInterval) clearInterval(attentionInterval)
