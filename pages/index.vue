@@ -24,6 +24,56 @@ const menu = computed(() => {
 
 const hoverN = ref(null)
 
+// On mobile there's no real hover, so people can't tell these menu items
+// are interactive — this plays a quick automatic "hover tour" through
+// them once, 3s after load, so the highlight + image swap show themselves.
+// Cancelled the moment someone actually hovers/touches a menu item.
+let userInteracted = false
+let autoPlayStartTimer = null
+let autoPlayStepTimer = null
+// While true, the image crossfade is sped up (see .auto-demo in the style
+// block) so each swap fully completes within the fast 0.2s step instead of
+// being cut off mid-fade by the next one.
+const autoDemoActive = ref(false)
+
+const stopAutoPlay = () => {
+    if (autoPlayStartTimer) { clearTimeout(autoPlayStartTimer); autoPlayStartTimer = null }
+    if (autoPlayStepTimer) { clearTimeout(autoPlayStepTimer); autoPlayStepTimer = null }
+    autoDemoActive.value = false
+}
+
+const onMenuHover = (i) => {
+    userInteracted = true
+    stopAutoPlay()
+    hoverN.value = i
+}
+const onMenuLeave = () => {
+    userInteracted = true
+    stopAutoPlay()
+    hoverN.value = null
+}
+
+const playAutoDemo = (i) => {
+    if (userInteracted) return
+    if (i >= menu.value.length) {
+        hoverN.value = null
+        autoDemoActive.value = false
+        return
+    }
+    hoverN.value = i
+    autoPlayStepTimer = setTimeout(() => playAutoDemo(i + 1), 200)
+}
+
+onMounted(() => {
+    autoPlayStartTimer = setTimeout(() => {
+        if (!userInteracted) {
+            autoDemoActive.value = true
+            playAutoDemo(0)
+        }
+    }, 2000)
+})
+onUnmounted(stopAutoPlay)
+
 // Shown when nothing is hovered: the Homepage "Default image" field,
 // falling back to the first menu item's image if none is set.
 const defaultImageUrl = computed(() =>
@@ -73,8 +123,9 @@ const hoverTitleStyle = (item, i) => {
             .menu.mb-6
                 .menu-item(
                     v-for='(item, i) in menu' :key='i'
-                    @mouseenter='hoverN = i'
-                    @mouseleave='hoverN = null'
+                    @mouseenter='onMenuHover(i)'
+                    @mouseleave='onMenuLeave'
+                    @touchstart='onMenuHover(i)'
                 )
                     prismic-link(v-if='item.link?.link_type && item.link.link_type !== "Any"' :field='item.link')
                         .pb-1.hover-title.font-b.uppercase.menu-title(:style='hoverTitleStyle(item, i)')
@@ -87,7 +138,7 @@ const hoverTitleStyle = (item, i) => {
 
             nuxt-link.book-cta.underline-hover.mono.uppercase.mt-4.inline-block(to='/contact' class='text-xs') Book me →
 
-            .images.mt-4(v-if='defaultImageUrl || menu.length')
+            .images.mt-4(v-if='defaultImageUrl || menu.length' :class='{ "auto-demo": autoDemoActive }')
                 .image(
                     v-if='defaultImageUrl'
                     :style='{ backgroundImage: `url(${defaultImageUrl})`, opacity: hoverN === null ? 1 : 0 }'
@@ -135,4 +186,8 @@ const hoverTitleStyle = (item, i) => {
             margin-top: 0
     .index-image-hover-wrapper
         transition: opacity 0.3s ease
+    // Sped up during the auto-play demo so each fade fully completes
+    // within its fast 0.2s step instead of being cut off by the next one.
+    .auto-demo .index-image-hover-wrapper
+        transition: opacity 0.15s ease
 </style>
