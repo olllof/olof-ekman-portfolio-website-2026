@@ -15,8 +15,9 @@ header#app-header
                 button(
                     @click='toggleTheme'
                     :aria-label='light ? "Switch to dark background" : "Switch to light background"'
+                    :class='{ shake: drawAttention }'
                     class='mb-3 md_mb-5 h-[2.16rem] md_h-[2.88rem]'
-                ).menu-color.cursor-pointer.flex.items-center.justify-center
+                ).menu-color.cursor-pointer.flex.items-center.justify-center.theme-toggle
                     //- Angel scaled ~1.2x so its head matches the devil's width
                     //- (halo adds height). Button height is fixed to the taller
                     //- icon so the sidebar title never shifts on toggle.
@@ -27,6 +28,20 @@ header#app-header
 <script setup>
 const light = useSiteTheme()
 const toggleTheme = () => { light.value = !light.value }
+
+// Nudges people to notice the theme toggle: briefly wiggles it every
+// minute rather than leaving it silent and easy to miss in the corner.
+const drawAttention = ref(false)
+let attentionInterval = null
+onMounted(() => {
+    attentionInterval = setInterval(() => {
+        drawAttention.value = true
+        setTimeout(() => { drawAttention.value = false }, 600)
+    }, 60000)
+})
+onUnmounted(() => {
+    if (attentionInterval) clearInterval(attentionInterval)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -53,6 +68,26 @@ const toggleTheme = () => { light.value = !light.value }
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-size: 1.15rem;
+    }
+}
+
+.theme-toggle.shake {
+    animation: theme-toggle-shake 0.6s ease-in-out;
+}
+
+@keyframes theme-toggle-shake {
+    0%, 100% { transform: rotate(0); }
+    15% { transform: rotate(-12deg); }
+    30% { transform: rotate(10deg); }
+    45% { transform: rotate(-8deg); }
+    60% { transform: rotate(6deg); }
+    75% { transform: rotate(-3deg); }
+    90% { transform: rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-toggle.shake {
+        animation: none;
     }
 }
 </style>
