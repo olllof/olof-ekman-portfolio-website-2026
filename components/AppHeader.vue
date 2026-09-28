@@ -30,7 +30,7 @@ const light = useSiteTheme()
 const toggleTheme = () => { light.value = !light.value }
 
 // Nudges people to notice the theme toggle: briefly wiggles it every
-// 45s rather than leaving it silent and easy to miss in the corner.
+// 30s rather than leaving it silent and easy to miss in the corner.
 //
 // Mobile browsers throttle/pause setInterval while a tab is backgrounded
 // or the screen is locked (desktop tabs rarely get backgrounded the same
@@ -39,7 +39,7 @@ const toggleTheme = () => { light.value = !light.value }
 // visibilitychange as well means it shakes as soon as someone returns to
 // the tab if 45s have already passed, rather than only while the tab
 // happened to stay continuously open and foregrounded.
-const ATTENTION_INTERVAL_MS = 45000
+const ATTENTION_INTERVAL_MS = 30000
 const drawAttention = ref(false)
 let attentionInterval = null
 let lastShakeAt = 0
