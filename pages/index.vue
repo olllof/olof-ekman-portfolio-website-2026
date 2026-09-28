@@ -85,7 +85,7 @@ const hoverTitleStyle = (item, i) => {
             .info.description(v-if='homepage?.data?.body')
                 prismic-rich-text(:field='homepage?.data?.body')
 
-            nuxt-link.underline-hover.mono.uppercase.mt-4.inline-block(to='/contact' class='text-xs') Book me →
+            nuxt-link.book-cta.underline-hover.mono.uppercase.mt-4.inline-block(to='/contact' class='text-xs') Book me →
 
             .images.mt-4(v-if='defaultImageUrl || menu.length')
                 .image(
@@ -115,6 +115,11 @@ const hoverTitleStyle = (item, i) => {
         max-width: 34ch
         line-height: 1.4
         text-shadow: none
+    // Same red as the "Photography by Olof Ekman" sidebar title. The
+    // underline-hover bar is `background: currentColor`, so changing just
+    // the text color here turns the underline red too, automatically.
+    .book-cta:hover
+        color: #e0392b
     .hover-title
         transition: all 0.1s ease
     .images
