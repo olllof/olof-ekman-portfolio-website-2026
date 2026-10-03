@@ -22,6 +22,7 @@ const viewAllCtaLink = computed(() => d.value.view_all_cta_link)
 
 const hero = computed(() => ({
     image: d.value.hero_image?.url || '',
+    video: d.value.hero_video?.url || '',
     caption: d.value.hero_caption || '',
     price: d.value.hero_price,
 }))
@@ -114,8 +115,13 @@ const openLightbox = (i) => {
             p.mb-4(class='text-[1.1rem] md_text-[1.4rem] italic' style='font-family: "Antic Didone", serif;') {{ tagline }}
             p.mb-6(class='max-w-[34ch] text-sm') {{ description }}
             prismic-link.underline-hover.mono.uppercase(v-if='aboutCtaLabel' :field='aboutCtaLink' class='text-xs') {{ aboutCtaLabel }} →
-        .hero-media(v-if='hero.image')
-            img.w-full.block.cursor-pointer(:src='imgUrl(hero.image, 1400)' :alt='hero.caption' @click='openLightbox(0)')
+        .hero-media(v-if='hero.video || hero.image')
+            video.hero-video.w-full.block(
+                v-if='hero.video'
+                :src='hero.video'
+                autoplay muted loop playsinline preload='auto'
+            )
+            img.w-full.block.cursor-pointer(v-else :src='imgUrl(hero.image, 1400)' :alt='hero.caption' @click='openLightbox(0)')
             .flex.justify-between.items-center.mt-2.mono(class='text-xs')
                 span {{ hero.caption }}
                 span.menu-color {{ formatPrice(hero.price) }}
@@ -192,6 +198,12 @@ const openLightbox = (i) => {
 
 <style lang="sass">
 #prints-page
+    // Keeps the hero a landscape box regardless of the uploaded clip's own
+    // aspect ratio, cropping to fill it rather than letterboxing.
+    .hero-video
+        aspect-ratio: 16 / 9
+        object-fit: cover
+
     .gallery-grid
         gap: 1.75rem
         @media (min-width: 768px)
