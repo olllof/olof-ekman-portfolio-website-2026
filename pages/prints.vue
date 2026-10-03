@@ -87,6 +87,46 @@ const stopDemo = (e, i) => {
     if (el) el.pause()
 }
 
+// Mobile has no hover, so its demo clips autoplay as they scroll into view
+// instead — like a feed — rather than needing any tap/hold gesture. Several
+// can be in view at once while scrolling, so (unlike the desktop hover,
+// which only ever has one active card) this tracks a whole set of indices.
+const inViewIndices = ref(new Set())
+let mobileAutoplayObserver = null
+
+const playVideoEl = (el) => {
+    el.currentTime = 0
+    // Same Chrome "paused to save power" quirk as the desktop hover case.
+    el.play().catch(() => el.play().catch(() => {}))
+}
+
+const observeMobileDemoVideos = () => {
+    if (mobileAutoplayObserver) mobileAutoplayObserver.disconnect()
+    mobileAutoplayObserver = new IntersectionObserver((entries) => {
+        const next = new Set(inViewIndices.value)
+        entries.forEach((entry) => {
+            const i = Number(entry.target.dataset.mobileVideo)
+            if (entry.isIntersecting) {
+                next.add(i)
+                playVideoEl(entry.target)
+            } else {
+                next.delete(i)
+                entry.target.pause()
+            }
+        })
+        inViewIndices.value = next
+    }, { threshold: 0.5 })
+    nextTick(() => {
+        document.querySelectorAll('[data-mobile-video]').forEach((el) => mobileAutoplayObserver.observe(el))
+    })
+}
+
+onMounted(observeMobileDemoVideos)
+// Prismic data loads async, so the mobile video elements this observes
+// don't exist yet on first mount — re-observe once prints actually render.
+watch(prints, observeMobileDemoVideos)
+onUnmounted(() => { if (mobileAutoplayObserver) mobileAutoplayObserver.disconnect() })
+
 // Same deterministic column placement as the Portraits/Weddings/Festivals
 // pages: print 1 goes to column 1, print 2 to column 2, print 3 to column
 // 3, print 4 back to column 1, etc., unless pinned to a specific column via
@@ -148,18 +188,16 @@ const openLightbox = (i) => {
                 )
                     .thumb.relative.overflow-hidden.cursor-pointer(
                         style='background: #15171d;'
-                        @mouseenter='startDemo($event, i, item)'
-                        @mouseleave='stopDemo($event, i)'
                         @click='openLightbox(i + 1)'
                     )
-                        img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
+                        img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: inViewIndices.has(i) ? 0 : 1, transition: "opacity 0.35s ease" }')
                         video.absolute.inset-0.w-full.h-full(
                             v-if='item.demo_video?.url'
+                            :data-mobile-video='i'
                             :src='item.demo_video.url'
                             muted loop playsinline preload='metadata'
-                            :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
+                            :style='{ opacity: inViewIndices.has(i) ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
                         )
-                        span.play-hint.mono.uppercase(v-if='item.demo_video?.url' class='text-[0.6rem]') Hover to preview
                     .cap.pt-2
                         .text-sm {{ item.caption }}
                         .mono.menu-color(class='text-xs') {{ formatPrice(item.price) }}
