@@ -267,13 +267,6 @@ const openLightbox = (i) => {
         @media (min-width: 768px)
             gap: 2.5rem
 
-    .print-card
-        .thumb img
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)
-
-        &:hover .thumb img
-            transform: scale(1.05)
-
     .play-hint
         position: absolute
         top: 0.6rem
