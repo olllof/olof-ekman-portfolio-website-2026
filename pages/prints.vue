@@ -59,18 +59,31 @@ const orderLink = (item) => ({
 // on desktop only — tapping a print opens the full-size lightbox instead).
 const playingIndex = ref(null)
 
-const startDemo = (i, item) => {
+// The mobile and desktop grids both render every print (one hidden via CSS
+// depending on screen width), so the same index exists twice in the DOM —
+// finding the video via e.currentTarget instead of a global index-based
+// query makes sure we always play/pause the one actually under the cursor.
+const startDemo = (e, i, item) => {
     if (!item.demo_video?.url) return
+    // event.currentTarget is only valid synchronously, during the event's
+    // own dispatch — it's already null by the time nextTick's callback
+    // runs, so the element has to be captured here, not read from e later.
+    const thumbEl = e.currentTarget
     playingIndex.value = i
     nextTick(() => {
-        const el = document.querySelector(`[data-print-video="${i}"]`)
-        if (el) { el.currentTime = 0; el.play().catch(() => {}) }
+        const el = thumbEl.querySelector('video')
+        if (!el) return
+        el.currentTime = 0
+        // Chrome often aborts the very first play() on a freshly-hovered,
+        // video-only clip ("paused to save power"), even though it's right
+        // under the cursor — an immediate retry succeeds every time.
+        el.play().catch(() => el.play().catch(() => {}))
     })
 }
-const stopDemo = (i) => {
+const stopDemo = (e, i) => {
     if (playingIndex.value !== i) return
     playingIndex.value = null
-    const el = document.querySelector(`[data-print-video="${i}"]`)
+    const el = e.currentTarget.querySelector('video')
     if (el) el.pause()
 }
 
@@ -135,14 +148,13 @@ const openLightbox = (i) => {
                 )
                     .thumb.relative.overflow-hidden.cursor-pointer(
                         style='background: #15171d;'
-                        @mouseenter='startDemo(i, item)'
-                        @mouseleave='stopDemo(i)'
+                        @mouseenter='startDemo($event, i, item)'
+                        @mouseleave='stopDemo($event, i)'
                         @click='openLightbox(i + 1)'
                     )
                         img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
                         video.absolute.inset-0.w-full.h-full(
                             v-if='item.demo_video?.url'
-                            :data-print-video='i'
                             :src='item.demo_video.url'
                             muted loop playsinline preload='metadata'
                             :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
@@ -161,14 +173,13 @@ const openLightbox = (i) => {
                 )
                     .thumb.relative.overflow-hidden.cursor-pointer(
                         style='background: #15171d;'
-                        @mouseenter='startDemo(i, item)'
-                        @mouseleave='stopDemo(i)'
+                        @mouseenter='startDemo($event, i, item)'
+                        @mouseleave='stopDemo($event, i)'
                         @click='openLightbox(i + 1)'
                     )
                         img.w-full.block(:src='imgUrl(item.image.url, 900)' :alt='item.caption' :style='{ opacity: playingIndex === i ? 0 : 1, transition: "opacity 0.35s ease" }')
                         video.absolute.inset-0.w-full.h-full(
                             v-if='item.demo_video?.url'
-                            :data-print-video='i'
                             :src='item.demo_video.url'
                             muted loop playsinline preload='metadata'
                             :style='{ opacity: playingIndex === i ? 1 : 0, transition: "opacity 0.35s ease", objectFit: "cover" }'
