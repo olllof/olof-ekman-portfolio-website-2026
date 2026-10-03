@@ -125,7 +125,7 @@ const openLightbox = (i) => {
             .flex.justify-between.items-center.mt-2.mono(class='text-xs')
                 span {{ hero.caption }}
                 span.menu-color {{ formatPrice(hero.price) }}
-            nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(:to='orderLink(hero)' class='text-xs') Order →
+            nuxt-link.underline-hover.mono.uppercase.mt-2.inline-block(v-if='!hero.video' :to='orderLink(hero)' class='text-xs') Order →
 
     .gallery.pb-8
         .gallery-grid.flex.md_hidden
